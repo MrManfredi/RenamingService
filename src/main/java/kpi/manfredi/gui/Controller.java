@@ -1,5 +1,9 @@
 package kpi.manfredi.gui;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.Tag;
+import com.drew.metadata.file.FileTypeDirectory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -50,9 +54,38 @@ public class Controller {
         add_button.setOnMouseClicked(event -> {
             FileChooser fileChooser = new FileChooser();
             Stage currentStage = (Stage) add_button.getScene().getWindow();
-            List<File> filesList = fileChooser.showOpenMultipleDialog(currentStage);
-            setImagesListView(filesList);
+            List<File> files = fileChooser.showOpenMultipleDialog(currentStage);
+            files = filterImages(files);
+            setImagesListView(files);
         });
+    }
+
+    private List<File> filterImages(List<File> files) {
+        return files.stream().filter(this::isImage).collect(Collectors.toList());
+    }
+
+    private boolean isImage(File file) {
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(file);
+            FileTypeDirectory fileTypeDirectory = metadata.getFirstDirectoryOfType(FileTypeDirectory.class);
+            ArrayList<Tag> tags = new ArrayList<>(fileTypeDirectory.getTags());
+            String description = tags.get(0).getDescription();
+            switch (description) {
+                case "PNG":
+                    logger.info("PNG file. {}", file);
+                    break;
+                case "JPEG":
+                    logger.info("JPEG file. {}", file);
+                    break;
+                default:
+                    logger.info("File is not image! {}", file);
+                    return false;
+            }
+            return true;
+        } catch (Exception ex) {
+            logger.error(ex.getMessage());
+            return false;
+        }
     }
 
     private void setImagesListView(List<File> filesList) {
