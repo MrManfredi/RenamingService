@@ -94,12 +94,12 @@
                         <RowConstraints maxHeight="-Infinity" minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
                      </rowConstraints>
                      <children>
-                        <ImageView fitHeight="500.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
+                        <ImageView fx:id="preview_image" fitHeight="500.0" fitWidth="500.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.valignment="CENTER" GridPane.vgrow="ALWAYS" HBox.hgrow="ALWAYS">
                            <VBox.margin>
                               <Insets left="20.0" right="20.0" top="20.0" />
                            </VBox.margin>
                            <image>
-                              <Image url="@prewiev_image.jpg" />
+                              <Image url="@preview_image.jpg" />
                            </image>
                            <rotationAxis>
                               <Point3D />
@@ -108,12 +108,12 @@
                               <Insets />
                            </GridPane.margin>
                         </ImageView>
-                        <Label text="Prewiew" textAlignment="CENTER" GridPane.columnIndex="1">
+                        <Label text="Preview" textAlignment="CENTER" GridPane.columnIndex="1">
                            <font>
                               <Font name="System Bold Italic" size="24.0" />
                            </font>
                         </Label>
-                        <Button mnemonicParsing="false" text="Open in Editor" GridPane.columnIndex="1" GridPane.rowIndex="2">
+                        <Button fx:id="open_image_button" mnemonicParsing="false" text="Open Image" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <GridPane.margin>
                               <Insets />
                            </GridPane.margin>
