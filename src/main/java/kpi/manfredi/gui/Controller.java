@@ -11,6 +11,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -33,30 +34,40 @@ public class Controller {
     private static final Logger logger = LoggerFactory.getLogger(Controller.class);
     private final String AUTOMATICALLY = "Automatically";
     private final String MANUALLY = "Manually";
+    private Stage mainStage;
+
+    //
+    // Container
+    //
+    @FXML
+    private VBox vBoxContainer;
 
     //
     // Menu
     //
     @FXML
-    private MenuItem about_menuItem;
+    private MenuItem menuFileOpen;
+
+    @FXML
+    private MenuItem menuEditSelectAll;
+
+    @FXML
+    private MenuItem menuEditClearClearAll;
+
+    @FXML
+    private MenuItem menuEditClearClearSelected;
+
+    @FXML
+    private MenuItem menuEditDelete;
+
+    @FXML
+    private MenuItem menuHelpAbout;
 
     ///
     // Images
     //
     @FXML
     private ListView<File> images_list_view;
-
-    @FXML
-    private Button add_button;
-
-    @FXML
-    private Button select_all_button;
-
-    @FXML
-    private Button remove_selected_button;
-
-    @FXML
-    private Button delete_selected_button;
 
     //
     // Renaming
@@ -107,17 +118,17 @@ public class Controller {
         set_image_list_view_key_listener();
         set_images_list_view_activity_listener();
 
+        // Menu
         // List View control buttons
-        set_add_button_listener();
-        set_select_all_button_listener();
-        set_remove_selected_button_listener();
-        set_delete_selected_button_listener();
+        setMenuFileOpenListener();
+        setMenuEditSelectAllListener();
+        setMenuEditClearClearAllListener();
+        setMenuEditClearClearSelectedListener();
+        setMenuEditDeleteListener();
+        setMenuHelpAboutListener();
 
         // Image preview
         set_open_image_button_listener();
-
-        // Menu
-        set_about_menuItem_listener();
 
         // Renaming
         set_add_prefix_checkbox_listener();
@@ -127,6 +138,11 @@ public class Controller {
         set_basis_text_field_key_listener();
         set_rename_button_listener();
         set_rename_all_selected_button_listener();
+    }
+
+    private Stage getMainStage() {
+        if (mainStage == null) mainStage = (Stage) vBoxContainer.getScene().getWindow();
+        return mainStage;
     }
 
     //
@@ -220,57 +236,6 @@ public class Controller {
         images_list_view.getItems().addAll(newItems);
         logger.info("Were replaced renamed items in ListView.");
         set_preview_image_of_focused_item();
-    }
-
-    //
-    // List View control buttons
-    //
-    private void set_add_button_listener() {
-        add_button.setOnMouseClicked(event -> {
-            FileChooser fileChooser = new FileChooser();
-            Stage currentStage = (Stage) add_button.getScene().getWindow();
-            List<File> files = fileChooser.showOpenMultipleDialog(currentStage);
-            if (files != null) {
-                files = filterImages(files);
-                setImagesListView(files);
-                removeDuplicates();
-            }
-        });
-    }
-
-    private void set_select_all_button_listener() {
-        select_all_button.setOnMouseClicked(event -> images_list_view.getSelectionModel().selectAll());
-        set_preview_image_of_focused_item();
-    }
-
-    private void set_remove_selected_button_listener() {
-        remove_selected_button.setOnMouseClicked(event -> {
-            ObservableList<File> filesToRemove = images_list_view.getSelectionModel().getSelectedItems();
-            images_list_view.getItems().removeAll(filesToRemove);
-            set_preview_image_of_focused_item();
-        });
-    }
-
-    private void set_delete_selected_button_listener() {
-        delete_selected_button.setOnMouseClicked(event -> {
-            ArrayList<File> filesToDelete = new ArrayList<>(images_list_view.getSelectionModel().getSelectedItems());
-
-            if (filesToDelete.isEmpty()) {
-                showInstructiveRemovalInformation();
-                return;
-            }
-
-            Optional<ButtonType> result = showDeleteConfirmationDialog(filesToDelete.size());
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                logger.info("Pressed on delete button. Result is OK! {} files to be deleted. ", filesToDelete.size());
-                ArrayList<File> notDeletedFiles = deleteFiles(filesToDelete);
-                filesToDelete.removeAll(notDeletedFiles);
-                images_list_view.getItems().removeAll(filesToDelete);
-                set_preview_image_of_focused_item();
-            } else {
-                logger.info("Pressed on delete button. Result is CANCEL!");
-            }
-        });
     }
 
     //
@@ -431,8 +396,64 @@ public class Controller {
     //
     // Menu
     //
-    private void set_about_menuItem_listener() {
-        about_menuItem.setOnAction(event -> {
+    private void setMenuFileOpenListener() {
+        menuFileOpen.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            List<File> files = fileChooser.showOpenMultipleDialog(getMainStage());
+            if (files != null) {
+                files = filterImages(files);
+                setImagesListView(files);
+                removeDuplicates();
+            }
+        });
+    }
+
+    private void setMenuEditSelectAllListener() {
+        menuEditSelectAll.setOnAction(event -> images_list_view.getSelectionModel().selectAll());
+        set_preview_image_of_focused_item();
+    }
+
+    private void setMenuEditClearClearAllListener() {
+        menuEditClearClearAll.setOnAction(event -> {
+            images_list_view.getSelectionModel().selectAll();
+            ObservableList<File> filesToRemove = images_list_view.getSelectionModel().getSelectedItems();
+            images_list_view.getItems().removeAll(filesToRemove);
+            set_preview_image_of_focused_item();
+        });
+    }
+
+    private void setMenuEditClearClearSelectedListener() {
+        menuEditClearClearSelected.setOnAction(event -> {
+            ObservableList<File> filesToRemove = images_list_view.getSelectionModel().getSelectedItems();
+            images_list_view.getItems().removeAll(filesToRemove);
+            set_preview_image_of_focused_item();
+        });
+    }
+
+    private void setMenuEditDeleteListener() {
+        menuEditDelete.setOnAction(event -> {
+            ArrayList<File> filesToDelete = new ArrayList<>(images_list_view.getSelectionModel().getSelectedItems());
+
+            if (filesToDelete.isEmpty()) {
+                showInstructiveRemovalInformation();
+                return;
+            }
+
+            Optional<ButtonType> result = showDeleteConfirmationDialog(filesToDelete.size());
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                logger.info("Pressed on delete button. Result is OK! {} files to be deleted. ", filesToDelete.size());
+                ArrayList<File> notDeletedFiles = deleteFiles(filesToDelete);
+                filesToDelete.removeAll(notDeletedFiles);
+                images_list_view.getItems().removeAll(filesToDelete);
+                set_preview_image_of_focused_item();
+            } else {
+                logger.info("Pressed on delete button. Result is CANCEL!");
+            }
+        });
+    }
+
+    private void setMenuHelpAboutListener() {
+        menuHelpAbout.setOnAction(event -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("About");
             alert.setHeaderText(null);

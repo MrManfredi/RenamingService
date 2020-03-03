@@ -22,23 +22,30 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="kpi.manfredi.gui.Controller">
+<VBox fx:id="vBoxContainer" prefHeight="600.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="kpi.manfredi.gui.Controller">
    <children>
       <MenuBar>
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
+                  <MenuItem fx:id="menuFileOpen" mnemonicParsing="false" text="Open" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">
             <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
+                  <MenuItem fx:id="menuEditSelectAll" mnemonicParsing="false" text="Select All" />
+                  <Menu mnemonicParsing="false" text="Clear">
+                    <items>
+                        <MenuItem fx:id="menuEditClearClearAll" mnemonicParsing="false" text="Сlear All" />
+                    <MenuItem fx:id="menuEditClearClearSelected" mnemonicParsing="false" text="Сlear Selected" />
+                    </items>
+                  </Menu>
+              <MenuItem fx:id="menuEditDelete" mnemonicParsing="false" text="Delete" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>
-              <MenuItem fx:id="about_menuItem" mnemonicParsing="false" text="About" />
+              <MenuItem fx:id="menuHelpAbout" mnemonicParsing="false" text="About" />
             </items>
           </Menu>
         </menus>
@@ -56,7 +63,6 @@
                     <rowConstraints>
                       <RowConstraints maxHeight="-Infinity" minHeight="40.0" prefHeight="40.0" vgrow="SOMETIMES" />
                       <RowConstraints prefHeight="250.0" vgrow="SOMETIMES" />
-                      <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="80.0" vgrow="SOMETIMES" />
                         <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
                         <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="105.0" vgrow="SOMETIMES" />
                         <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
@@ -70,35 +76,7 @@
                            <GridPane.margin>
                               <Insets bottom="5.0" />
                            </GridPane.margin></ListView>
-                        <GridPane GridPane.columnIndex="1" GridPane.rowIndex="2">
-                          <columnConstraints>
-                            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                              <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
-                              <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
-                           <children>
-                              <Button fx:id="add_button" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="120.0" text="Add">
-                                 <GridPane.margin>
-                                    <Insets right="10.0" />
-                                 </GridPane.margin></Button>
-                              <Button fx:id="remove_selected_button" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="120.0" text="Remove Selected" GridPane.rowIndex="1">
-                                 <GridPane.margin>
-                                    <Insets right="10.0" />
-                                 </GridPane.margin></Button>
-                              <Button fx:id="delete_selected_button" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="120.0" text="Delete Selected" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                 <GridPane.margin>
-                                    <Insets left="10.0" />
-                                 </GridPane.margin></Button>
-                              <Button fx:id="select_all_button" layoutX="136.0" layoutY="23.0" maxWidth="1.7976931348623157E308" mnemonicParsing="false" prefWidth="120.0" text="Select All" GridPane.columnIndex="1">
-                                 <GridPane.margin>
-                                    <Insets left="10.0" />
-                                 </GridPane.margin></Button>
-                           </children>
-                        </GridPane>
-                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                        <HBox prefHeight="100.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.rowIndex="4">
                            <children>
                               <GridPane HBox.hgrow="ALWAYS">
                                 <columnConstraints>
@@ -123,12 +101,12 @@
                               </GridPane>
                            </children>
                         </HBox>
-                        <Label text="Renaming" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                        <Label text="Renaming" GridPane.columnIndex="1" GridPane.rowIndex="2">
                            <font>
                               <Font name="System Bold Italic" size="24.0" />
                            </font>
                         </Label>
-                        <GridPane GridPane.columnIndex="1" GridPane.rowIndex="4">
+                        <GridPane GridPane.columnIndex="1" GridPane.rowIndex="3">
                           <columnConstraints>
                             <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="100.0" />
                             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
