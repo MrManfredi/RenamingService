@@ -1,4 +1,4 @@
-package kpi.manfredi.gui;
+package kpi.manfredi.utils;
 
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.metadata.Metadata;
@@ -7,6 +7,7 @@ import com.drew.metadata.file.FileTypeDirectory;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
+import kpi.manfredi.gui.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,12 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static kpi.manfredi.gui.Dialogs.showFileNotFoundAlert;
+import static kpi.manfredi.utils.Dialogs.showFileNotFoundAlert;
 
-abstract class FileManipulation {
+public abstract class FileManipulation {
     private static final Logger logger = LoggerFactory.getLogger(Controller.class);
 
-    static List<File> filterImages(List<File> files) {
+    public static List<File> filterImages(List<File> files) {
         return files.stream().filter(FileManipulation::isImage).collect(Collectors.toList());
     }
 
@@ -52,7 +53,7 @@ abstract class FileManipulation {
         }
     }
 
-    static ArrayList<File> deleteFiles(ArrayList<File> fileArrayList) {
+    public static ArrayList<File> deleteFiles(ArrayList<File> fileArrayList) {
         ArrayList<File> notDeletedFiles = new ArrayList<>();
         fileArrayList.forEach(file -> {
             if (file.exists()) {
@@ -71,7 +72,7 @@ abstract class FileManipulation {
         return notDeletedFiles;
     }
 
-    static File convertToFile(Image image) {
+    public static File convertToFile(Image image) {
         try {
             URL url = new URL(image.getUrl());
             URI uri = url.toURI();
@@ -91,7 +92,7 @@ abstract class FileManipulation {
         }
     }
 
-    static File renameFile(File item, String newName) throws IOException {
+    public static File renameFile(File item, String newName) throws IOException {
         if (item.exists()) {
             String path = item.getPath();
             String format = getFormatOfFile(path);
@@ -113,7 +114,7 @@ abstract class FileManipulation {
         }
     }
 
-    static ObservableList<File> renameFilesByTemplate(ObservableList<File> itemsToRename, String prefix, String postfix) {
+    public static ObservableList<File> renameFilesByTemplate(ObservableList<File> itemsToRename, String prefix, String postfix) {
         int i = 1;
         ObservableList<File> renamedItems = FXCollections.observableArrayList();
         for (File item : itemsToRename) {

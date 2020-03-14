@@ -27,8 +27,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static kpi.manfredi.gui.Dialogs.*;
-import static kpi.manfredi.gui.FileManipulation.*;
+import static kpi.manfredi.utils.Dialogs.*;
+import static kpi.manfredi.utils.FileManipulation.*;
 
 public class Controller {
     private static final Logger logger = LoggerFactory.getLogger(Controller.class);
