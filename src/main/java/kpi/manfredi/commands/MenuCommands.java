@@ -1,8 +1,10 @@
 package kpi.manfredi.commands;
 
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import kpi.manfredi.gui.IterativeRenaming;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +49,16 @@ public abstract class MenuCommands {
             deleteFrom.removeAll(filesToBeDeleted);
         } else {
             logger.info("Pressed on delete button. Result is CANCEL!");
+        }
+    }
+
+    public static void renameIteratively(ListView<File> files) {
+        List<File> selectedItems = files.getSelectionModel().getSelectedItems();
+        List<File> renamedFiles = IterativeRenaming.getInstance().
+                startRenamingProcedure(selectedItems);
+        if (selectedItems != renamedFiles) {
+            files.getItems().removeAll(selectedItems);
+            files.getItems().addAll(renamedFiles);
         }
     }
 }

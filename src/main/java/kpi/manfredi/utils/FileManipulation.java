@@ -118,9 +118,9 @@ public abstract class FileManipulation {
         }
     }
 
-    public static ObservableList<File> renameFilesByTemplate(ObservableList<File> itemsToRename, String prefix, String postfix) {
+    public static List<File> renameFilesByTemplate(List<File> itemsToRename, String prefix, Integer zeroPad,String postfix) {
         int i = 1;
-        ObservableList<File> renamedItems = FXCollections.observableArrayList();
+        List<File> renamedItems = FXCollections.observableArrayList();
         for (File item : itemsToRename) {
             if (item.exists()) {
                 try {
@@ -129,7 +129,11 @@ public abstract class FileManipulation {
                     path = path.replace(item.getName(), "");
                     File newFile;
                     do {
-                        newFile = new File(path + prefix + String.format("%05d", i++) + postfix + format);
+                        newFile = new File(path
+                                + prefix
+                                + String.format("%0" + zeroPad + "d", i++)
+                                + postfix
+                                + format);
                     } while (newFile.exists());
 
                     boolean success = item.renameTo(newFile);
