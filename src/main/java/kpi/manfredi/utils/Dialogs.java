@@ -54,4 +54,13 @@ public abstract class Dialogs {
         return alert.showAndWait();
     }
 
+    public static void showAboutWindow() {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("About");
+        alert.setHeaderText(null);
+        alert.setContentText("Hi! This program was developed by MrManfredi to help with " +
+                "image processing (renaming, deleting, etc.).");
+        alert.showAndWait();
+    }
+
 }

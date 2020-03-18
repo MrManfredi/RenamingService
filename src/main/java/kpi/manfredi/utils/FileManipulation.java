@@ -25,6 +25,10 @@ import static kpi.manfredi.utils.Dialogs.showFileNotFoundAlert;
 public abstract class FileManipulation {
     private static final Logger logger = LoggerFactory.getLogger(Controller.class);
 
+    public static List<File> removeDuplicates(List<File> list) {
+        return list.stream().distinct().collect(Collectors.toList());
+    }
+
     public static List<File> filterImages(List<File> files) {
         return files.stream().filter(FileManipulation::isImage).collect(Collectors.toList());
     }
@@ -53,8 +57,8 @@ public abstract class FileManipulation {
         }
     }
 
-    public static ArrayList<File> deleteFiles(ArrayList<File> fileArrayList) {
-        ArrayList<File> notDeletedFiles = new ArrayList<>();
+    public static List<File> deleteFiles(List<File> fileArrayList) {
+        List<File> notDeletedFiles = new ArrayList<>();
         fileArrayList.forEach(file -> {
             if (file.exists()) {
                 logger.info("-- Deleting file " + file);
@@ -125,7 +129,7 @@ public abstract class FileManipulation {
                     path = path.replace(item.getName(), "");
                     File newFile;
                     do {
-                        newFile = new File(path + prefix + i++ + postfix + format);
+                        newFile = new File(path + prefix + String.format("%05d", i++) + postfix + format);
                     } while (newFile.exists());
 
                     boolean success = item.renameTo(newFile);

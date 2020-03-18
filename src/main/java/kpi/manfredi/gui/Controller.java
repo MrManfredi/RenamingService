@@ -11,9 +11,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.VBox;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import kpi.manfredi.commands.MenuCommands;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,11 +23,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static kpi.manfredi.utils.Dialogs.*;
 import static kpi.manfredi.utils.FileManipulation.*;
@@ -45,29 +43,30 @@ public class Controller {
     //
     // Menu
     //
-    @FXML
-    private MenuItem menuFileOpen;
 
     @FXML
-    private MenuItem menuEditSelectAll;
+    private MenuItem menuOpen;
 
     @FXML
-    private MenuItem menuEditClearClearAll;
+    private MenuItem menuSelectAll;
 
     @FXML
-    private MenuItem menuEditClearClearSelected;
+    private MenuItem menuClearAll;
 
     @FXML
-    private MenuItem menuEditDelete;
+    private MenuItem menuClearSelected;
 
     @FXML
-    private MenuItem menuHelpAbout;
+    private MenuItem menuDelete;
+
+    @FXML
+    private MenuItem menuAbout;
 
     ///
     // Images
     //
     @FXML
-    private ListView<File> images_list_view;
+    private ListView<File> imagesListView;
 
     //
     // Renaming
@@ -113,19 +112,13 @@ public class Controller {
     //
     public void initialize() {
         // List View
-        images_list_view.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        imagesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         setListViewCellFactory();
         set_image_list_view_key_listener();
         set_images_list_view_activity_listener();
 
         // Menu
-        // List View control buttons
-        setMenuFileOpenListener();
-        setMenuEditSelectAllListener();
-        setMenuEditClearClearAllListener();
-        setMenuEditClearClearSelectedListener();
-        setMenuEditDeleteListener();
-        setMenuHelpAboutListener();
+        initMenuListeners();
 
         // Image preview
         set_open_image_button_listener();
@@ -149,7 +142,7 @@ public class Controller {
     // List View
     //
     private void setListViewCellFactory() {
-        images_list_view.setCellFactory(lv -> {
+        imagesListView.setCellFactory(lv -> {
             ListCell<File> cell = new ListCell<>() {
 
                 @Override
@@ -175,7 +168,7 @@ public class Controller {
     }
 
     private void set_image_list_view_key_listener() {
-        images_list_view.setOnKeyPressed(event -> {
+        imagesListView.setOnKeyPressed(event -> {
             switch (event.getCode()) {
                 case UP:
                 case DOWN:
@@ -186,7 +179,7 @@ public class Controller {
     }
 
     private boolean set_preview_image_of_focused_item() {
-        File focusedItem = images_list_view.getFocusModel().getFocusedItem();
+        File focusedItem = imagesListView.getFocusModel().getFocusedItem();
         if (focusedItem == null) {
             setDefaultPreviewImage();
             return false;
@@ -200,28 +193,15 @@ public class Controller {
             }
         } else {
             logger.warn("File {} does not exist!", focusedItem);
-            images_list_view.getItems().remove(focusedItem);
+            imagesListView.getItems().remove(focusedItem);
             showFileNotFoundAlert(focusedItem);
         }
         return true;
     }
 
-    private void setImagesListView(List<File> filesList) {
-        ObservableList<File> filesObservableList = FXCollections.observableList(filesList);
-        images_list_view.getItems().addAll(filesObservableList);
-    }
-
-    private void removeDuplicates() {
-        Stream<File> distinct = images_list_view.getItems().stream().distinct();
-        List<File> filesList = distinct.collect(Collectors.toList());
-        ObservableList<File> filesObservableList = FXCollections.observableArrayList(filesList);
-        images_list_view.setItems(filesObservableList);
-        set_preview_image_of_focused_item();
-    }
-
     private void set_images_list_view_activity_listener() {
 
-        images_list_view.focusedProperty().addListener((observable, oldValue, newValue) -> {
+        imagesListView.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 logger.info("Image ListView gained focused. Basis choice box value set null.");
                 basis_choice_box.setValue(null);
@@ -231,9 +211,9 @@ public class Controller {
     }
 
     private void replaceRenamedItemsInListView(ObservableList<File> newItems) {
-        ObservableList<File> selectedItems = images_list_view.getSelectionModel().getSelectedItems();
-        images_list_view.getItems().removeAll(selectedItems);
-        images_list_view.getItems().addAll(newItems);
+        ObservableList<File> selectedItems = imagesListView.getSelectionModel().getSelectedItems();
+        imagesListView.getItems().removeAll(selectedItems);
+        imagesListView.getItems().addAll(newItems);
         logger.info("Were replaced renamed items in ListView.");
         set_preview_image_of_focused_item();
     }
@@ -272,10 +252,10 @@ public class Controller {
     }
 
     private void set_focus_on_first_selected_item() {
-        ObservableList<Integer> selectedIndices = images_list_view.getSelectionModel().getSelectedIndices();
+        ObservableList<Integer> selectedIndices = imagesListView.getSelectionModel().getSelectedIndices();
         if (!selectedIndices.isEmpty()) {
-            images_list_view.getFocusModel().focus(selectedIndices.get(0));
-            logger.info("Set focus on first selected item - {}", images_list_view.getFocusModel().getFocusedItem());
+            imagesListView.getFocusModel().focus(selectedIndices.get(0));
+            logger.info("Set focus on first selected item - {}", imagesListView.getFocusModel().getFocusedItem());
         }
     }
 
@@ -303,8 +283,8 @@ public class Controller {
     }
 
     private void handleManuallyRenaming() {
-        File itemToRename = images_list_view.getFocusModel().getFocusedItem();
-        int focusedIndex = images_list_view.getFocusModel().getFocusedIndex();
+        File itemToRename = imagesListView.getFocusModel().getFocusedItem();
+        int focusedIndex = imagesListView.getFocusModel().getFocusedIndex();
 
         String prefix = add_prefix_checkbox.isSelected() ? prefix_text_field.getText() : "";
         String basis = basis_text_field.getText();
@@ -316,8 +296,8 @@ public class Controller {
             logger.info("Pressed on rename button. Result is OK!");
             try {
                 itemToRename = renameFile(itemToRename, newName);
-                images_list_view.getItems().set(focusedIndex, itemToRename);
-                images_list_view.getSelectionModel().clearSelection(focusedIndex);
+                imagesListView.getItems().set(focusedIndex, itemToRename);
+                imagesListView.getSelectionModel().clearSelection(focusedIndex);
                 set_focus_on_first_selected_item();
                 if (set_preview_image_of_focused_item()) {
                     setNameOfFocusedFileInBasisTextField();
@@ -332,7 +312,7 @@ public class Controller {
     }
 
     private void setNameOfFocusedFileInBasisTextField() {
-        String name = images_list_view.getFocusModel().getFocusedItem().getName();
+        String name = imagesListView.getFocusModel().getFocusedItem().getName();
         name = name.substring(0, name.lastIndexOf('.'));
         basis_text_field.setText(name);
         basis_text_field.selectAll();
@@ -340,7 +320,7 @@ public class Controller {
 
     private void set_rename_all_selected_button_listener() {
         rename_all_selected_button.setOnMouseClicked(event -> {
-            ObservableList<File> itemsToRename = images_list_view.getSelectionModel().getSelectedItems();
+            ObservableList<File> itemsToRename = imagesListView.getSelectionModel().getSelectedItems();
             String prefix = add_prefix_checkbox.isSelected() ? prefix_text_field.getText() : "";
             String postfix = add_postfix_checkbox.isSelected() ? postfix_text_field.getText() : "";
 
@@ -379,7 +359,7 @@ public class Controller {
                         }
                     } else {
                         logger.warn("File {} does not exist!", file);
-                        images_list_view.getItems().remove(file);
+                        imagesListView.getItems().remove(file);
                         showFileNotFoundAlert(file);
                         setDefaultPreviewImage();
                     }
@@ -396,70 +376,26 @@ public class Controller {
     //
     // Menu
     //
-    private void setMenuFileOpenListener() {
-        menuFileOpen.setOnAction(event -> {
-            FileChooser fileChooser = new FileChooser();
-            List<File> files = fileChooser.showOpenMultipleDialog(getMainStage());
-            if (files != null) {
-                files = filterImages(files);
-                setImagesListView(files);
-                removeDuplicates();
-            }
-        });
+    private void initMenuListeners() {
+        menuOpen.setOnAction(event ->
+                MenuCommands.open(imagesListView.getItems(), getMainStage()));
+        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN));
+        menuSelectAll.setOnAction(event ->
+                imagesListView.getSelectionModel().selectAll());
+        menuClearAll.setOnAction(event ->
+                imagesListView.getItems().clear());
+        menuClearSelected.setOnAction(event ->
+                MenuCommands.delete(
+                        imagesListView.getItems(),
+                        imagesListView.getSelectionModel().getSelectedItems(),
+                        false));
+        menuDelete.setOnAction(event ->
+                MenuCommands.delete(
+                        imagesListView.getItems(),
+                        imagesListView.getSelectionModel().getSelectedItems(),
+                        true));
+        menuDelete.setAccelerator(new KeyCodeCombination(KeyCode.DELETE));
+        menuAbout.setOnAction(event -> showAboutWindow());
     }
 
-    private void setMenuEditSelectAllListener() {
-        menuEditSelectAll.setOnAction(event -> images_list_view.getSelectionModel().selectAll());
-        set_preview_image_of_focused_item();
-    }
-
-    private void setMenuEditClearClearAllListener() {
-        menuEditClearClearAll.setOnAction(event -> {
-            images_list_view.getSelectionModel().selectAll();
-            ObservableList<File> filesToRemove = images_list_view.getSelectionModel().getSelectedItems();
-            images_list_view.getItems().removeAll(filesToRemove);
-            set_preview_image_of_focused_item();
-        });
-    }
-
-    private void setMenuEditClearClearSelectedListener() {
-        menuEditClearClearSelected.setOnAction(event -> {
-            ObservableList<File> filesToRemove = images_list_view.getSelectionModel().getSelectedItems();
-            images_list_view.getItems().removeAll(filesToRemove);
-            set_preview_image_of_focused_item();
-        });
-    }
-
-    private void setMenuEditDeleteListener() {
-        menuEditDelete.setOnAction(event -> {
-            ArrayList<File> filesToDelete = new ArrayList<>(images_list_view.getSelectionModel().getSelectedItems());
-
-            if (filesToDelete.isEmpty()) {
-                showInstructiveRemovalInformation();
-                return;
-            }
-
-            Optional<ButtonType> result = showDeleteConfirmationDialog(filesToDelete.size());
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                logger.info("Pressed on delete button. Result is OK! {} files to be deleted. ", filesToDelete.size());
-                ArrayList<File> notDeletedFiles = deleteFiles(filesToDelete);
-                filesToDelete.removeAll(notDeletedFiles);
-                images_list_view.getItems().removeAll(filesToDelete);
-                set_preview_image_of_focused_item();
-            } else {
-                logger.info("Pressed on delete button. Result is CANCEL!");
-            }
-        });
-    }
-
-    private void setMenuHelpAboutListener() {
-        menuHelpAbout.setOnAction(event -> {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("About");
-            alert.setHeaderText(null);
-            alert.setContentText("Hi! This program was developed by MrManfredi to help with " +
-                    "image processing (renaming, deleting, etc.).");
-            alert.showAndWait();
-        });
-    }
 }
