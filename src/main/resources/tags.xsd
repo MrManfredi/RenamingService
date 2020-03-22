@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://tags.manfredi.kpi"
+           xmlns:tns="http://tags.manfredi.kpi"
+           elementFormDefault="qualified">
+    <xs:complexType name="Category">
+        <xs:sequence>
+            <xs:element name="category" type="tns:Category" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="tag" type="xs:token" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:token" use="required"/>
+        <xs:attribute name="alsoTag" type="xs:boolean" use="required"/>
+    </xs:complexType>
+
+    <xs:element name="tagsStorage">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="category" type="tns:Category" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
