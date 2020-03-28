@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.*;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -12,6 +13,8 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import kpi.manfredi.commands.MenuCommands;
+import kpi.manfredi.tags.TagsHandler;
+import org.controlsfx.control.CheckTreeView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,8 +61,23 @@ public class Controller {
     @FXML
     private MenuItem menuAbout;
 
+    //
+    // Left Panel
+    //
+    @FXML
+    private CheckTreeView<Object> tagsTree;
+
+    @FXML
+    private TextArea oldName;
+
+    @FXML
+    private TextArea newName;
+
+    @FXML
+    private Button renameButton;
+
     ///
-    // Images
+    // Images list
     //
     @FXML
     private ListView<File> imagesListView;
@@ -77,16 +95,53 @@ public class Controller {
     // Main method
     //
     public void initialize() {
-        // List View
-        imagesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        initListViewCellFactory();
-        initImagesLvKeyListener();
 
         // Menu
         initMenuListeners();
 
+        // Left Panel
+        initTagsTree();
+
+        // Images List
+        initImagesListView();
+
         // Image preview
         initOpenImageButtonListener();
+
+    }
+
+    //
+    // Menu
+    //
+    private void initMenuListeners() {
+        menuOpen.setOnAction(event ->
+                MenuCommands.open(imagesListView.getItems(), getMainStage()));
+        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN));
+        menuSelectAll.setOnAction(event ->
+                imagesListView.getSelectionModel().selectAll());
+        menuClearAll.setOnAction(event ->
+                imagesListView.getItems().clear());
+        menuClearSelected.setOnAction(event ->
+                MenuCommands.delete(
+                        imagesListView.getItems(),
+                        imagesListView.getSelectionModel().getSelectedItems(),
+                        false));
+        menuRenameIteratively.setOnAction(event ->
+                MenuCommands.renameIteratively(imagesListView));
+        menuDelete.setOnAction(event ->
+                MenuCommands.delete(
+                        imagesListView.getItems(),
+                        imagesListView.getSelectionModel().getSelectedItems(),
+                        true));
+        menuDelete.setAccelerator(new KeyCodeCombination(KeyCode.DELETE));
+        menuAbout.setOnAction(event -> showAboutWindow());
+    }
+
+    //
+    // Left Panel
+    //
+    private void initTagsTree() {
+        tagsTree.setRoot(TagsHandler.getRootItem(TagsHandler.getTagsStorage()));
     }
 
     private Stage getMainStage() {
@@ -95,9 +150,13 @@ public class Controller {
     }
 
     //
-    // List View
+    // Images List
     //
-    private void initListViewCellFactory() {
+    private void initImagesListView() {
+        imagesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        initImagesLvKeyListener();
+
         imagesListView.setCellFactory(lv -> {
             ListCell<File> cell = new ListCell<>() {
                 @Override
@@ -183,33 +242,6 @@ public class Controller {
     private void setDefaultPreviewImage() {
         Image image = new Image("preview_image.jpg");
         previewImage.setImage(image);
-    }
-
-    //
-    // Menu
-    //
-    private void initMenuListeners() {
-        menuOpen.setOnAction(event ->
-                MenuCommands.open(imagesListView.getItems(), getMainStage()));
-        menuOpen.setAccelerator(new KeyCodeCombination(KeyCode.Q, KeyCombination.CONTROL_DOWN));
-        menuSelectAll.setOnAction(event ->
-                imagesListView.getSelectionModel().selectAll());
-        menuClearAll.setOnAction(event ->
-                imagesListView.getItems().clear());
-        menuClearSelected.setOnAction(event ->
-                MenuCommands.delete(
-                        imagesListView.getItems(),
-                        imagesListView.getSelectionModel().getSelectedItems(),
-                        false));
-        menuRenameIteratively.setOnAction(event ->
-                MenuCommands.renameIteratively(imagesListView));
-        menuDelete.setOnAction(event ->
-                MenuCommands.delete(
-                        imagesListView.getItems(),
-                        imagesListView.getSelectionModel().getSelectedItems(),
-                        true));
-        menuDelete.setAccelerator(new KeyCodeCombination(KeyCode.DELETE));
-        menuAbout.setOnAction(event -> showAboutWindow());
     }
 
 }

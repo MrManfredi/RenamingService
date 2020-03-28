@@ -157,4 +157,8 @@ public class Category {
         this.alsoTag = value;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }
