@@ -1,5 +1,6 @@
 package kpi.manfredi.commands;
 
+import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
@@ -12,9 +13,11 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
-import static kpi.manfredi.utils.Dialogs.showDeleteConfirmationDialog;
-import static kpi.manfredi.utils.Dialogs.showInstructiveRemovalInformation;
+import static kpi.manfredi.utils.DialogsUtil.showAlert;
+import static kpi.manfredi.utils.DialogsUtil.showConfirmationDialog;
 import static kpi.manfredi.utils.FileManipulation.*;
+import static kpi.manfredi.utils.MessageUtil.formatMessage;
+import static kpi.manfredi.utils.MessageUtil.getMessage;
 
 public abstract class MenuCommands {
     private static final Logger logger = LoggerFactory.getLogger(MenuCommands.class);
@@ -36,19 +39,28 @@ public abstract class MenuCommands {
 
     public static void delete(List<File> deleteFrom, List<File> filesToBeDeleted, boolean deleteFromHardDrive) {
         if (filesToBeDeleted.isEmpty()) {
-            showInstructiveRemovalInformation();
-            return;
-        }
-
-        Optional<ButtonType> result = showDeleteConfirmationDialog(filesToBeDeleted.size());
-        if (result.isPresent() && result.get() == ButtonType.OK) {
-            logger.info("Pressed on delete button. Result is OK! {} deleteFrom to be deleted.", filesToBeDeleted.size());
-            if (deleteFromHardDrive) {
-                deleteFiles(filesToBeDeleted);
-            }
-            deleteFrom.removeAll(filesToBeDeleted);
+            showAlert(
+                    Alert.AlertType.WARNING,
+                    getMessage("warning.title"),
+                    getMessage("deleting.info")
+            );
         } else {
-            logger.info("Pressed on delete button. Result is CANCEL!");
+
+            Optional<ButtonType> result = showConfirmationDialog(
+                    getMessage("deleting.title"),
+                    getMessage("deleting.header"),
+                    formatMessage("deleting.content", filesToBeDeleted.size())
+            );
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                logger.info(formatMessage("log.dialog.confirm.ok", "delete", filesToBeDeleted.size()));
+                if (deleteFromHardDrive) {
+                    deleteFiles(filesToBeDeleted);
+                }
+                deleteFrom.removeAll(filesToBeDeleted);
+            } else {
+                logger.info(formatMessage("log.dialog.confirm.cancel", "delete"));
+            }
         }
     }
 

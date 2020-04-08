@@ -16,8 +16,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-import static kpi.manfredi.utils.Dialogs.showRenameAllSelectedConfirmationDialog;
+import static kpi.manfredi.utils.DialogsUtil.showConfirmationDialog;
 import static kpi.manfredi.utils.FileManipulation.renameFilesByTemplate;
+import static kpi.manfredi.utils.MessageUtil.formatMessage;
+import static kpi.manfredi.utils.MessageUtil.getMessage;
 
 public class IterativeRenaming implements Initializable {
 
@@ -102,14 +104,19 @@ public class IterativeRenaming implements Initializable {
             String prefix = prefixCheckBox.isSelected() ? prefixTf.getText() : "";
             String postfix = postfixCheckBox.isSelected() ? postfixTf.getText() : "";
 
-            Optional<ButtonType> result =
-                    showRenameAllSelectedConfirmationDialog(files.size(), prefix + "*" + postfix);
+            Optional<ButtonType> result = showConfirmationDialog(
+                    getMessage("renaming.iterative.title"),
+                    formatMessage("renaming.iterative.header", prefix, postfix),
+                    formatMessage("renaming.iterative.content", files.size())
+            );
+
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                logger.info("Pressed on rename button. Result is OK! {} files to be rename. ", files.size());
+                logger.info(formatMessage("log.dialog.confirm.ok", "rename", files.size()));
                 files = renameFilesByTemplate(files, prefix, zeroPad.getValue(), postfix);
             } else {
-                logger.info("Pressed on rename button. Result is CANCEL!");
+                logger.info(formatMessage("log.dialog.confirm.cancel", "rename"));
             }
+
             thisStage.close();
         });
     }

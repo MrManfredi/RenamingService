@@ -1,8 +1,9 @@
 package kpi.manfredi.gui;
 
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
@@ -14,6 +15,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import kpi.manfredi.commands.MenuCommands;
 import kpi.manfredi.tags.TagsHandler;
+import kpi.manfredi.tags.TagsStorage;
 import org.controlsfx.control.CheckTreeView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +25,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
-import static kpi.manfredi.utils.Dialogs.showAboutWindow;
-import static kpi.manfredi.utils.Dialogs.showFileNotFoundAlert;
+import static kpi.manfredi.utils.DialogsUtil.showAlert;
+import static kpi.manfredi.utils.DialogsUtil.showFileNotFoundAlert;
 import static kpi.manfredi.utils.FileManipulation.convertToFile;
+import static kpi.manfredi.utils.MessageUtil.getMessage;
 
 public class Controller {
     private static final Logger logger = LoggerFactory.getLogger(Controller.class);
@@ -101,6 +104,7 @@ public class Controller {
 
         // Left Panel
         initTagsTree();
+        initTagsSelectionListener();
 
         // Images List
         initImagesListView();
@@ -134,14 +138,33 @@ public class Controller {
                         imagesListView.getSelectionModel().getSelectedItems(),
                         true));
         menuDelete.setAccelerator(new KeyCodeCombination(KeyCode.DELETE));
-        menuAbout.setOnAction(event -> showAboutWindow());
+        menuAbout.setOnAction(event -> showAlert(
+                Alert.AlertType.INFORMATION,
+                getMessage("about.title"),
+                getMessage("about.header"),
+                getMessage("about.content")
+        ));
     }
 
     //
     // Left Panel
     //
     private void initTagsTree() {
-        tagsTree.setRoot(TagsHandler.getRootItem(TagsHandler.getTagsStorage()));
+        TagsStorage tagsStorage = TagsHandler.getTagsStorage();
+
+        if (tagsStorage == null) {
+            tagsTree.setRoot(new CheckBoxTreeItem<>("Error"));
+            tagsTree.setShowRoot(true);
+        } else {
+            CheckBoxTreeItem<Object> rootItem = TagsHandler.getRootItem(tagsStorage);
+            tagsTree.setRoot(rootItem);
+        }
+    }
+
+    private void initTagsSelectionListener() {
+        tagsTree.getCheckModel().getCheckedItems().addListener((ListChangeListener<TreeItem<Object>>) c ->
+                newName.setText(tagsTree.getCheckModel().getCheckedItems().toString())
+        );
     }
 
     private Stage getMainStage() {
@@ -213,7 +236,7 @@ public class Controller {
     private void setPreviewImage(File file) throws MalformedURLException {
         Image image = new Image(file.toURI().toURL().toString());
         previewImage.setImage(image);
-        logger.info("Set preview image to {}", file);
+        logger.debug("Set preview image to {}", file);
     }
 
     private void initOpenImageButtonListener() {

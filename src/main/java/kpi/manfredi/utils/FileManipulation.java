@@ -5,7 +5,6 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.Tag;
 import com.drew.metadata.file.FileTypeDirectory;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.image.Image;
 import kpi.manfredi.gui.Controller;
 import org.slf4j.Logger;
@@ -20,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static kpi.manfredi.utils.Dialogs.showFileNotFoundAlert;
+import static kpi.manfredi.utils.DialogsUtil.showFileNotFoundAlert;
 
 public abstract class FileManipulation {
     private static final Logger logger = LoggerFactory.getLogger(Controller.class);
@@ -96,25 +95,25 @@ public abstract class FileManipulation {
         }
     }
 
-    public static File renameFile(File item, String newName) throws IOException {
-        if (item.exists()) {
-            String path = item.getPath();
+    public static File renameFile(File file, String newName) throws IOException {
+        if (file.exists()) {
+            String path = file.getPath();
             String format = getFormatOfFile(path);
-            path = path.replace(item.getName(), "");
+            path = path.replace(file.getName(), "");
             File newFile = new File(path + newName + format);
             if (newFile.exists()) {
-                throw new IOException("File with name \"" + newName + format + "\" already exists!");
+                throw new IOException("File with name '" + newName + format + "' already exists!");
             }
 
-            boolean success = item.renameTo(newFile);
+            boolean success = file.renameTo(newFile);
             if (!success) {
-                throw new IOException("File:\n" + item + "\nwas not successfully renamed!");
+                throw new IOException("File:\n" + file + "\nwas not successfully renamed!");
             } else {
-                logger.info("File \"{}\" was successfully renamed to \"{}\"", item.getName(), newFile.getName());
+                logger.info("File '{}' was successfully renamed to '{}'", file.getName(), newFile.getName());
                 return newFile;
             }
         } else {
-            throw new FileNotFoundException("File with name \"" + item + "\" not found!");
+            throw new FileNotFoundException("File '" + file + "' not found!");
         }
     }
 
@@ -138,7 +137,7 @@ public abstract class FileManipulation {
 
                     boolean success = item.renameTo(newFile);
                     if (!success) {
-                        throw new IOException("File:\n" + item + "\nwas not successfully renamed!");
+                        throw new IOException("File:\n" + item + "\nrenaming was failed!");
                     } else {
                         renamedItems.add(newFile);
                         logger.info("File \"{}\" was successfully renamed to \"{}\"", item.getName(), newFile.getName());
