@@ -21,10 +21,20 @@ import static kpi.manfredi.utils.DialogsUtil.showAlert;
 import static kpi.manfredi.utils.MessageUtil.formatMessage;
 import static kpi.manfredi.utils.MessageUtil.getMessage;
 
+/**
+ * This class is used to provide methods to read / write tags from/to {@value XML_FILE} file
+ * and represent it as {@code CheckTreeView}
+ */
 public class TagsHandler {
     private static final String SCHEMA_LOCATION = "src/main/resources/tags.xsd";
     private static final String XML_FILE = "tags.xml";
 
+    /**
+     * This method is used to parse {@value XML_FILE} file (that contains categories and tags)
+     * and convert to object view
+     *
+     * @return {@code TagsStorage} instance which is a container of categories and tags
+     */
     public static TagsStorage getTagsStorage() {
         TagsStorage tagsStorage = null;
         File file = new File(XML_FILE);
@@ -48,6 +58,11 @@ public class TagsHandler {
         return tagsStorage;
     }
 
+    /**
+     * This method is used to write categories and tags from {@code TagsStorage} instance to {@value XML_FILE} file
+     *
+     * @param storage instance that contains categories and tags
+     */
     public static void saveTags(TagsStorage storage) {
         try {
 
@@ -70,6 +85,12 @@ public class TagsHandler {
         }
     }
 
+
+    /**
+     * This method is used to show alert about exception cause
+     *
+     * @param e exception
+     */
     private static void handleParsingException(Exception e) {
         String constraintViolation = e.getCause().getMessage().
                 substring(e.getCause().getMessage().indexOf(':') + 2);
@@ -82,6 +103,13 @@ public class TagsHandler {
         );
     }
 
+    /**
+     * This method is used to represent {@code TagsStorage} in the form of a {@code CheckTreeView}
+     * by creating an appropriate hierarchy of tree items
+     *
+     * @param tagsStorage instance that contains categories and tags
+     * @return {@code CheckTreeView} root item
+     */
     public static CheckBoxTreeItem<Object> getRootItem(TagsStorage tagsStorage) {
         CheckBoxTreeItem<Object> root = new CheckBoxTreeItem<>("Root");
         ObservableList<TreeItem<Object>> childItems = root.getChildren();
@@ -91,6 +119,13 @@ public class TagsHandler {
         return root;
     }
 
+    /**
+     * This method is used to recursively bypass the hierarchy of each category
+     * to represent it as {@code CheckBoxTreeItem} elements
+     *
+     * @param category the category that will be processed
+     * @return {@code CheckBoxTreeItem} element that represent the {@code category}
+     */
     private static CheckBoxTreeItem<Object> handleCategory(Category category) {
         CheckBoxTreeItem<Object> categoryTreeItem = new CheckBoxTreeItem<>(category);
         categoryTreeItem.setIndependent(true);
@@ -105,6 +140,12 @@ public class TagsHandler {
         return categoryTreeItem;
     }
 
+    /**
+     * This method is used to to represent tags as {@code CheckBoxTreeItem} elements
+     *
+     * @param tags list of items
+     * @return list of tree items
+     */
     private static ObservableList<TreeItem<Object>> handleTags(List<String> tags) {
         ObservableList<TreeItem<Object>> treeItems = FXCollections.observableArrayList();
         for (String tag : tags) {
