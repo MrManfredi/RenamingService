@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -150,7 +151,16 @@ public class Controller {
     // Left Panel
     //
     private void initTagsTree() {
-        TagsStorage tagsStorage = TagsHandler.getTagsStorage();
+        TagsStorage tagsStorage = null;
+
+        try {
+            tagsStorage = TagsHandler.getTagsStorage();
+        } catch (FileNotFoundException e) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    getMessage("error.title"),
+                    e.getMessage());
+        }
 
         if (tagsStorage == null) {
             tagsTree.setRoot(new CheckBoxTreeItem<>("Error"));

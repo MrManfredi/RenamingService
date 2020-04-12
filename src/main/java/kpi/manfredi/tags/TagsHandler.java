@@ -5,6 +5,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
+import kpi.manfredi.utils.FileManipulation;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -15,6 +16,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import static kpi.manfredi.utils.DialogsUtil.showAlert;
@@ -26,18 +28,21 @@ import static kpi.manfredi.utils.MessageUtil.getMessage;
  * and represent it as {@code CheckTreeView}
  */
 public class TagsHandler {
-    private static final String SCHEMA_LOCATION = "src/main/resources/tags.xsd";
+    private static final String SCHEMA_LOCATION = "/tags.xsd";
     private static final String XML_FILE = "tags.xml";
 
     /**
      * This method is used to parse {@value XML_FILE} file (that contains categories and tags)
      * and convert to object view
      *
-     * @return {@code TagsStorage} instance which is a container of categories and tags
+     * @return {@code TagsStorage} instance which is a container of categories and tags.
+     * @throws FileNotFoundException schema file not found
      */
-    public static TagsStorage getTagsStorage() {
+    public static TagsStorage getTagsStorage() throws FileNotFoundException {
         TagsStorage tagsStorage = null;
         File file = new File(XML_FILE);
+        File schemaFile = FileManipulation.getResourceFile(SCHEMA_LOCATION);
+
         if (file.exists()) {
             try {
 
@@ -45,7 +50,7 @@ public class TagsHandler {
 
                 Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
                 Schema schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-                        .newSchema(new File(SCHEMA_LOCATION));
+                        .newSchema(schemaFile);
                 jaxbUnmarshaller.setSchema(schema);
                 tagsStorage = (TagsStorage) jaxbUnmarshaller.unmarshal(file);
 
@@ -55,6 +60,7 @@ public class TagsHandler {
         } else {
             tagsStorage = new TagsStorage();
         }
+
         return tagsStorage;
     }
 

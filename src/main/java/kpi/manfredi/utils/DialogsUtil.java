@@ -97,7 +97,7 @@ public abstract class DialogsUtil {
         showAlert(
                 Alert.AlertType.WARNING,
                 getMessage("warning.title"),
-                formatMessage("file.not.found", file)
+                formatMessage("file.not.found.extended", file)
         );
     }
 }
