@@ -6,7 +6,6 @@ import com.drew.metadata.Tag;
 import com.drew.metadata.file.FileTypeDirectory;
 import javafx.collections.FXCollections;
 import javafx.scene.image.Image;
-import kpi.manfredi.gui.Controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +20,7 @@ import static kpi.manfredi.utils.DialogsUtil.showFileNotFoundAlert;
 import static kpi.manfredi.utils.MessageUtil.formatMessage;
 
 public abstract class FileManipulation {
-    private static final Logger logger = LoggerFactory.getLogger(Controller.class);
+    private static final Logger logger = LoggerFactory.getLogger(FileManipulation.class);
 
     public static List<File> removeDuplicates(List<File> list) {
         return list.stream().distinct().collect(Collectors.toList());
@@ -85,6 +84,13 @@ public abstract class FileManipulation {
         }
     }
 
+    /**
+     * This method is used to return a format of file
+     *
+     * @param path path to file
+     * @return format of file
+     * @throws IOException File format is undefined
+     */
     private static String getFormatOfFile(String path) throws IOException {
         int indexOfLastDot = path.lastIndexOf('.');
         if (indexOfLastDot == -1) {
