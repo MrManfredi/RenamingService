@@ -1,10 +1,10 @@
 package kpi.manfredi.utils;
 
+import kpi.manfredi.gui.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
-import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -13,19 +13,9 @@ import java.util.ResourceBundle;
  *
  * @author manfredi
  */
-public class MessageUtil {
+public abstract class MessageUtil {
     private final static Logger logger = LoggerFactory.getLogger(MessageUtil.class);
     private final static String RESOURCE_NAME = "i18n.messages";
-
-    /**
-     * This method is used to return current locale setting
-     *
-     * @return current locale
-     */
-    private static Locale getCurrentLocale() {
-        // todo read locale from config file
-        return new Locale("eng");   // eng, ukr, rus
-    }
 
     /**
      * This method is used to return resource bundle with current locale
@@ -33,7 +23,7 @@ public class MessageUtil {
      * @return resource bundle with current locale. Otherwise resource bundle with default locale.
      */
     private static ResourceBundle getResource() {
-        return ResourceBundle.getBundle(RESOURCE_NAME, getCurrentLocale());
+        return ResourceBundle.getBundle(RESOURCE_NAME, Context.getInstance().getCurrentLocale());
     }
 
     /**

@@ -5,7 +5,9 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import kpi.manfredi.gui.IterativeRenaming;
+import kpi.manfredi.gui.controllers.IterativeRenamingController;
+import kpi.manfredi.utils.DialogsUtil;
+import kpi.manfredi.utils.MessageUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,8 +68,18 @@ public abstract class MenuCommands {
 
     public static void renameIteratively(ListView<File> files) {
         List<File> selectedItems = files.getSelectionModel().getSelectedItems();
-        List<File> renamedFiles = IterativeRenaming.getInstance().
+
+        if (selectedItems.isEmpty()) {
+            DialogsUtil.showAlert(
+                    Alert.AlertType.WARNING,
+                    getMessage("warning.title"),
+                    MessageUtil.getMessage("renaming.info"));
+            return;
+        }
+
+        List<File> renamedFiles = IterativeRenamingController.getInstance().
                 startRenamingProcedure(selectedItems);
+
         if (selectedItems != renamedFiles) {
             files.getItems().removeAll(selectedItems);
             files.getItems().addAll(renamedFiles);

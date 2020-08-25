@@ -1,16 +1,16 @@
-package kpi.manfredi.gui;
+package kpi.manfredi.gui.controllers;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import kpi.manfredi.gui.Context;
+import kpi.manfredi.gui.Screen;
+import kpi.manfredi.gui.ScreenSwitcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +21,9 @@ import static kpi.manfredi.utils.FileManipulation.renameFilesByTemplate;
 import static kpi.manfredi.utils.MessageUtil.formatMessage;
 import static kpi.manfredi.utils.MessageUtil.getMessage;
 
-public class IterativeRenaming implements Initializable {
+public class IterativeRenamingController implements Initializable {
 
-    private static final Logger logger = LoggerFactory.getLogger(IterativeRenaming.class);
+    private static final Logger logger = LoggerFactory.getLogger(IterativeRenamingController.class);
 
     //
     // Renaming
@@ -49,34 +49,21 @@ public class IterativeRenaming implements Initializable {
     @FXML
     private Button renameButton;
 
-    private static IterativeRenaming instance;
-    private Stage thisStage;
+    private static IterativeRenamingController instance;
+    private final Stage thisStage;
     private List<File> files;
 
-    public static IterativeRenaming getInstance() {
-        if (instance == null) instance = new IterativeRenaming();
+    public static IterativeRenamingController getInstance() {
+        if (instance == null) instance = new IterativeRenamingController();
         return instance;
     }
 
-    private IterativeRenaming() {
-        // Create the new stage
-        thisStage = new Stage();
-
-        // Load the FXML file
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/IterativeRenamingWindow.fxml"));
-
-            // Set this class as the controller
-            loader.setController(this);
-
-            // Load the scene
-            thisStage.setScene(new Scene(loader.load()));
-
-            thisStage.setTitle("Iterative Renaming");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private IterativeRenamingController() {
+        thisStage = ScreenSwitcher.showModalScreen(
+                Screen.ITERATIVE_RENAMING,
+                Context.getInstance().getPrimaryStage(),
+                this);
+        thisStage.setTitle("Iterative Renaming");
     }
 
     @Override

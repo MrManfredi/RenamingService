@@ -38,13 +38,13 @@ public abstract class FileManipulation {
             String description = tags.get(0).getDescription();
             switch (description) {
                 case "PNG":
-                    logger.info("PNG file. {}", file);
+                    logger.debug("PNG file. {}", file);
                     break;
                 case "JPEG":
-                    logger.info("JPEG file. {}", file);
+                    logger.debug("JPEG file. {}", file);
                     break;
                 default:
-                    logger.info("File is not image! {}", file);
+                    logger.debug("File is not image! {}", file);
                     return false;
             }
             return true;
@@ -58,10 +58,10 @@ public abstract class FileManipulation {
         List<File> notDeletedFiles = new ArrayList<>();
         fileArrayList.forEach(file -> {
             if (file.exists()) {
-                logger.info("-- Deleting file " + file);
+                logger.debug("-- Deleting file " + file);
                 boolean isDeleted = file.delete();
                 if (isDeleted) {
-                    logger.info("---- File was deleted successfully");
+                    logger.debug("---- File was deleted successfully");
                 } else {
                     logger.error("---- Error. The file was not deleted!");
                     notDeletedFiles.add(file);
@@ -114,7 +114,7 @@ public abstract class FileManipulation {
             if (!success) {
                 throw new IOException("File:\n" + file + "\nwas not successfully renamed!");
             } else {
-                logger.info("File '{}' was successfully renamed to '{}'", file.getName(), newFile.getName());
+                logger.debug("File '{}' was successfully renamed to '{}'", file.getName(), newFile.getName());
                 return newFile;
             }
         } else {
@@ -145,7 +145,7 @@ public abstract class FileManipulation {
                         throw new IOException("File:\n" + item + "\nrenaming was failed!");
                     } else {
                         renamedItems.add(newFile);
-                        logger.info("File \"{}\" was successfully renamed to \"{}\"", item.getName(), newFile.getName());
+                        logger.debug("File \"{}\" was successfully renamed to \"{}\"", item.getName(), newFile.getName());
                     }
                 } catch (IOException e) {
                     logger.error(e.getMessage());

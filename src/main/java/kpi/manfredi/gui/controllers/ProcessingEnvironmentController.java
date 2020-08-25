@@ -1,11 +1,11 @@
-package kpi.manfredi.gui;
+package kpi.manfredi.gui.controllers;
 
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -31,8 +31,8 @@ import static kpi.manfredi.utils.DialogsUtil.showFileNotFoundAlert;
 import static kpi.manfredi.utils.FileManipulation.convertToFile;
 import static kpi.manfredi.utils.MessageUtil.getMessage;
 
-public class Controller {
-    private static final Logger logger = LoggerFactory.getLogger(Controller.class);
+public class ProcessingEnvironmentController {
+    private static final Logger logger = LoggerFactory.getLogger(ProcessingEnvironmentController.class);
     private Stage mainStage;
 
     //
@@ -204,7 +204,7 @@ public class Controller {
 
             cell.setOnMouseClicked(e -> {
                 if (!cell.isEmpty()) {
-                    logger.info("You clicked on " + cell.getItem());
+                    logger.debug("You clicked on " + cell.getItem());
                     setFocusedImagePreview();
                 }
             });
