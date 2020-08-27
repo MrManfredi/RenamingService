@@ -21,6 +21,7 @@ import org.controlsfx.control.CheckTreeView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.xml.bind.JAXBException;
 import java.awt.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -155,12 +156,19 @@ public class ProcessingEnvironmentController {
         TagsStorage tagsStorage = null;
 
         try {
-            tagsStorage = TagsCustodian.getTagsStorage();
+            tagsStorage = TagsCustodian.getTags();
         } catch (FileNotFoundException e) {
             showAlert(
                     Alert.AlertType.ERROR,
                     getMessage("error.title"),
                     e.getMessage());
+        } catch (JAXBException jbe) {
+            showAlert(
+                    Alert.AlertType.ERROR,
+                    getMessage("error.title"),
+                    jbe.getMessage(),
+                    getMessage("tags.validation.error.content")
+            );
         }
 
         if (tagsStorage == null) {

@@ -3,7 +3,6 @@ package kpi.manfredi.tags;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -34,7 +33,7 @@ public abstract class TagsAnalyzer {
     }
 
     /**
-     * This method is used to parse filenames and collect a list of tags
+     * This method is used to parse filenames and collect a list of unique tags
      *
      * @param files list of files
      * @return list of tags
@@ -45,7 +44,8 @@ public abstract class TagsAnalyzer {
         for (String filename : files) {
             tags.addAll(parseFilename(filename));
         }
-        return new ArrayList<>(tags);
+
+        return tags.stream().sorted().collect(Collectors.toList());
     }
 
     /**

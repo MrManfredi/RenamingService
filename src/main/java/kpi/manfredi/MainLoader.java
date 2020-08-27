@@ -3,8 +3,12 @@ package kpi.manfredi;
 import javafx.application.Application;
 import kpi.manfredi.gui.JavaFxMain;
 import kpi.manfredi.monitoring.MonitoringService;
+import kpi.manfredi.tags.TagsAdapter;
 import kpi.manfredi.tags.TagsAnalyzer;
+import kpi.manfredi.tags.TagsCustodian;
 
+import javax.xml.bind.JAXBException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -89,7 +93,13 @@ public class MainLoader {
                     System.out.println(item);
                 }
             } else {
-                // todo write to file
+                try {
+                    TagsCustodian.saveTags(TagsAdapter.getMapper(tags), args[3]);
+                } catch (FileNotFoundException | JAXBException e) {
+                    System.err.println(e.getMessage());
+                    System.exit(-1);
+                }
+                System.out.println("Tags was written into " + args[3]);
             }
         }
     }

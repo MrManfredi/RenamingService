@@ -4,6 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
+import kpi.manfredi.tags.mapper.Mapper;
+import kpi.manfredi.tags.mapper.Tag;
 
 import java.util.List;
 
@@ -61,6 +63,31 @@ public abstract class TagsAdapter {
             treeItems.add(new CheckBoxTreeItem<>(tag, null, false, true));
         }
         return treeItems;
+    }
+
+    /**
+     * This method is used to adapt list of tags to {@code Mapper} structure and
+     * create the basis of the mapping.
+     *
+     * <br><br>
+     * Example:
+     * <br><br>
+     * Input: {#tag1 #tag2}
+     * <br><br>
+     * Output: Mapper { Tag {#tag1 , {tag1}}, Tag {#tag2 , {tag2}}}
+     *
+     * @param tags list of tags
+     * @return {@code Mapper} instance
+     */
+    public static Mapper getMapper(List<String> tags) {
+        Mapper mapper = new Mapper();
+        for (String tagStr : tags) {
+            Tag tag = new Tag();
+            tag.setName(tagStr);
+            tag.getAlias().add(tagStr.substring(1));
+            mapper.getTag().add(tag);
+        }
+        return mapper;
     }
 
 }

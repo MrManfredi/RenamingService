@@ -1,10 +1,6 @@
 package kpi.manfredi.tags;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
-import javafx.scene.control.CheckBoxTreeItem;
-import javafx.scene.control.TreeItem;
+import kpi.manfredi.tags.mapper.Mapper;
 import kpi.manfredi.utils.FileManipulation;
 import org.xml.sax.SAXException;
 
@@ -17,17 +13,15 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.List;
 
-import static kpi.manfredi.utils.DialogsUtil.showAlert;
 import static kpi.manfredi.utils.MessageUtil.formatMessage;
-import static kpi.manfredi.utils.MessageUtil.getMessage;
 
 /**
  * This class is used to provide methods to read / write tags from/to {@value XML_FILE} file
  */
 public abstract class TagsCustodian {
     private static final String SCHEMA_LOCATION = "/tags.xsd";
+    private static final String MAPPER_SCHEMA_LOCATION = "/tagsMapper.xsd";
     private static final String XML_FILE = "tags.xml";
 
     /**
@@ -36,9 +30,10 @@ public abstract class TagsCustodian {
      *
      * @return {@code TagsStorage} instance which is a container of categories and tags.
      * @throws FileNotFoundException schema file not found
+     * @throws JAXBException         validation failed
      */
-    public static TagsStorage getTagsStorage() throws FileNotFoundException {
-        TagsStorage tagsStorage = null;
+    public static TagsStorage getTags() throws FileNotFoundException, JAXBException {
+        TagsStorage tagsStorage;
         File file = new File(XML_FILE);
         File schemaFile = FileManipulation.getResourceFile(SCHEMA_LOCATION);
 
@@ -54,7 +49,7 @@ public abstract class TagsCustodian {
                 tagsStorage = (TagsStorage) jaxbUnmarshaller.unmarshal(file);
 
             } catch (JAXBException | SAXException e) {
-                handleParsingException(e);
+                throw new JAXBException(formatExceptionMessage(e, XML_FILE));
             }
         } else {
             tagsStorage = new TagsStorage();
@@ -64,30 +59,49 @@ public abstract class TagsCustodian {
     }
 
     /**
-     * This method is used to write categories and tags from {@code TagsStorage} instance to {@value XML_FILE} file
+     * This method is used to save tags to XML file
      *
-     * @param storage instance that contains categories and tags
+     * @param tags    instance that contains data
+     * @param xmlFile name of file to save into
+     * @throws FileNotFoundException schema file not found
      */
-    public static void saveTags(TagsStorage storage) {
+    public static void saveTags(Object tags, String xmlFile) throws FileNotFoundException, JAXBException {
         try {
 
-            File file = new File(XML_FILE);
-            JAXBContext jaxbContext = JAXBContext.newInstance(TagsStorage.class);
+            File file = new File(xmlFile);
+            File schemaFile = FileManipulation.getResourceFile(getSchemaLocation(tags));
+
+            JAXBContext jaxbContext = JAXBContext.newInstance(tags.getClass());
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 
             // output pretty printed
             jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 
             Schema schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-                    .newSchema(new File(SCHEMA_LOCATION));
+                    .newSchema(schemaFile);
             jaxbMarshaller.setSchema(schema);
 
-            jaxbMarshaller.marshal(storage, file);
-            jaxbMarshaller.marshal(storage, System.out);
+            jaxbMarshaller.marshal(tags, file);
 
         } catch (JAXBException | SAXException e) {
-            handleParsingException(e);
+            throw new JAXBException(formatExceptionMessage(e, xmlFile));
         }
+    }
+
+    /**
+     * This method is used to return appropriate schema location
+     *
+     * @param tags instance that contains data
+     * @return schema location
+     */
+    private static String getSchemaLocation(Object tags) {
+        String schemaLocation = null;
+        if (tags instanceof TagsStorage) {
+            schemaLocation = SCHEMA_LOCATION;
+        } else if (tags instanceof Mapper) {
+            schemaLocation = MAPPER_SCHEMA_LOCATION;
+        }
+        return schemaLocation;
     }
 
     /**
@@ -95,16 +109,10 @@ public abstract class TagsCustodian {
      *
      * @param e exception
      */
-    private static void handleParsingException(Exception e) {
+    private static String formatExceptionMessage(Exception e, String xmlFile) {
         String constraintViolation = e.getCause().getMessage().
                 substring(e.getCause().getMessage().indexOf(':') + 2);
-
-        showAlert(
-                Alert.AlertType.ERROR,
-                getMessage("error.title"),
-                formatMessage("tags.validation.error.header", XML_FILE, constraintViolation),
-                getMessage("tags.validation.error.content")
-        );
+        return formatMessage("tags.validation.error.header", xmlFile, constraintViolation);
     }
 
 }

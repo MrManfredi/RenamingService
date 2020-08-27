@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://mapper.tags.manfredi.kpi"
+           xmlns:tns="http://mapper.tags.manfredi.kpi"
+           elementFormDefault="qualified">
+    <xs:complexType name="Tag">
+        <xs:sequence>
+            <xs:element name="alias" minOccurs="1" maxOccurs="unbounded">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="[a-zA-Z_\d]+"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="name" use="required">
+            <xs:simpleType>
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="#[a-zA-Z_\d]+"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:element name="mapper">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="tag" type="tns:Tag" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
