@@ -6,12 +6,16 @@ import kpi.manfredi.monitoring.MonitoringService;
 import kpi.manfredi.tags.TagsAdapter;
 import kpi.manfredi.tags.TagsAnalyzer;
 import kpi.manfredi.tags.TagsCustodian;
+import kpi.manfredi.tags.map.TagsMap;
 
 import javax.xml.bind.JAXBException;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 
 public class MainLoader {
@@ -45,7 +49,7 @@ public class MainLoader {
      * This method is used to show help information about application API
      */
     private static void showHelp() {
-        System.out.println("Usage: java -jar <application-name> [-h | -m [-r] <dir> | " +
+        System.out.println("Usage: java -jar <application-name> [-h | -m [-r] <dir> <file-with-tags> | " +
                 "-a [-r] <dir> [<file-save-into>]]");
         System.out.println("without param.  - gui application");
         System.out.println("-a              - analyze directory and collect tags");
@@ -81,9 +85,9 @@ public class MainLoader {
     private static void runTagsAnalyzer(String[] args) {
         List<String> tags;
         if (args.length == 2 || !args[1].equals("-r")) {
-            tags = TagsAnalyzer.getTagsByPath(Paths.get(args[1]), false);
+            tags = TagsAnalyzer.getTagsFromDirectory(Paths.get(args[1]), false);
         } else {
-            tags = TagsAnalyzer.getTagsByPath(Paths.get(args[2]), true);
+            tags = TagsAnalyzer.getTagsFromDirectory(Paths.get(args[2]), true);
         }
 
         if (tags != null) {
@@ -107,16 +111,22 @@ public class MainLoader {
     /**
      * This method is used to check if arguments meet the condition of {@code MonitoringService}.
      * <br><br>
-     * Valid input parameters: -m [-r] &lt;dir&gt;
+     * Valid input parameters: -m [-r] &lt;dir&gt; &lt;file-with-tags&gt;
      *
      * @param args list of arguments
      * @return {@code true} when the parameters meet the condition of {@code MonitoringService}. Otherwise {@code false}
      */
     public static boolean isMonitoringService(String[] args) {
-        boolean result = false;
-        if (args.length > 1 && args.length < 4 && args[0].equals("-m") && (args.length == 2 || args[1].equals("-r"))) {
-            result = true;
+        boolean result;
+
+        if (args.length < 3 || !args[0].equals("-m")) {
+            result = false;
+        } else if (args[1].equals("-r")) {
+            result = args.length == 4 && Files.exists(Paths.get(args[2])) && Files.exists(Paths.get(args[3]));
+        } else {
+            result = args.length == 3 && Files.exists(Paths.get(args[1])) && Files.exists(Paths.get(args[2]));
         }
+
         return result;
     }
 
@@ -126,13 +136,24 @@ public class MainLoader {
      * @param args input arguments
      */
     private static void runMonitoringService(String[] args) {
+        boolean recursive;
+        Path dir;
+        File tagsFile;
+
+        if (args.length == 3) {
+            recursive = false;
+            dir = Paths.get(args[1]);
+            tagsFile = new File(args[2]);
+        } else {
+            recursive = true;
+            dir = Paths.get(args[2]);
+            tagsFile = new File(args[3]);
+        }
         try {
-            if (args.length == 2) {
-                new MonitoringService(Paths.get(args[1]), false).run();
-            } else {
-                new MonitoringService(Paths.get(args[2]), true).run();
-            }
-        } catch (IOException e) {
+            TagsMap mapper = (TagsMap) TagsCustodian.getTags(tagsFile, TagsMap.class);
+            HashMap<String, String> tagsMap = TagsAdapter.getTagsMap(mapper);
+            new MonitoringService(dir, recursive).run(); // todo pass tagsMap into monitoring service
+        } catch (IOException | IllegalAccessException | JAXBException e) {
             System.err.println(e.getMessage());
         }
     }

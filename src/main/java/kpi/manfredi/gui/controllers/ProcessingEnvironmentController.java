@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 import kpi.manfredi.commands.MenuCommands;
 import kpi.manfredi.tags.TagsAdapter;
 import kpi.manfredi.tags.TagsCustodian;
-import kpi.manfredi.tags.TagsStorage;
+import kpi.manfredi.tags.tree.TagsTree;
 import org.controlsfx.control.CheckTreeView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,10 +153,10 @@ public class ProcessingEnvironmentController {
     // Left Panel
     //
     private void initTagsTree() {
-        TagsStorage tagsStorage = null;
+        TagsTree tagsTree = null;
 
         try {
-            tagsStorage = TagsCustodian.getTags();
+            tagsTree = TagsCustodian.getTags();
         } catch (FileNotFoundException e) {
             showAlert(
                     Alert.AlertType.ERROR,
@@ -171,12 +171,12 @@ public class ProcessingEnvironmentController {
             );
         }
 
-        if (tagsStorage == null) {
-            tagsTree.setRoot(new CheckBoxTreeItem<>("Error"));
-            tagsTree.setShowRoot(true);
+        if (tagsTree == null) {
+            this.tagsTree.setRoot(new CheckBoxTreeItem<>("Error"));
+            this.tagsTree.setShowRoot(true);
         } else {
-            CheckBoxTreeItem<Object> rootItem = TagsAdapter.getRootItem(tagsStorage);
-            tagsTree.setRoot(rootItem);
+            CheckBoxTreeItem<Object> rootItem = TagsAdapter.getRootItem(tagsTree);
+            this.tagsTree.setRoot(rootItem);
         }
     }
 

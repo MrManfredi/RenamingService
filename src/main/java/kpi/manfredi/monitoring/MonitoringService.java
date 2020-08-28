@@ -59,7 +59,8 @@ public class MonitoringService implements Runnable {
     /**
      * Creates a WatchService and registers the given directory
      */
-    public MonitoringService(Path dir, boolean recursive) throws IOException {
+    public MonitoringService(Path dir, boolean recursive)
+            throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<>();
         this.recursive = recursive;

@@ -1,6 +1,7 @@
 package kpi.manfredi.tags;
 
-import kpi.manfredi.tags.mapper.Mapper;
+import kpi.manfredi.tags.map.TagsMap;
+import kpi.manfredi.tags.tree.TagsTree;
 import kpi.manfredi.utils.FileManipulation;
 import org.xml.sax.SAXException;
 
@@ -13,49 +14,71 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.InvocationTargetException;
 
 import static kpi.manfredi.utils.MessageUtil.formatMessage;
 
 /**
- * This class is used to provide methods to read / write tags from/to {@value XML_FILE} file
+ * This class is used to provide methods to save tags in XML file and read it
  */
 public abstract class TagsCustodian {
-    private static final String SCHEMA_LOCATION = "/tags.xsd";
-    private static final String MAPPER_SCHEMA_LOCATION = "/tagsMapper.xsd";
-    private static final String XML_FILE = "tags.xml";
+    private static final String TAGS_TREE_XSD = "/tagsTree.xsd";
+    private static final String TAGS_MAP_XSD = "/tagsMap.xsd";
+    private static final String TAGS_XML = "tags.xml";
 
     /**
-     * This method is used to parse {@value XML_FILE} file (that contains categories and tags)
+     * This method is used to parse data from XML file
+     *
+     * @param xmlFile     file to read from
+     * @param targetClass the class of the object to be returned
+     * @return {@code targetClass} instance (Empty, if {@code xmlFile} not exists)
+     * @throws FileNotFoundException  schema file not found
+     * @throws JAXBException          validation failed
+     * @throws IllegalAccessException the target class does not have a public default constructor
+     */
+    public static Object getTags(File xmlFile, Class<?> targetClass)
+            throws FileNotFoundException, JAXBException, IllegalAccessException {
+        Object tags;
+        File schemaFile = FileManipulation.getResourceFile(getSchemaLocation(targetClass));
+
+        if (xmlFile.exists()) {
+            try {
+
+                JAXBContext jaxbContext = JAXBContext.newInstance(targetClass);
+
+                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+                Schema schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
+                        .newSchema(schemaFile);
+                jaxbUnmarshaller.setSchema(schema);
+                tags = targetClass.cast(jaxbUnmarshaller.unmarshal(xmlFile));
+
+            } catch (JAXBException | SAXException e) {
+                throw new JAXBException(formatExceptionMessage(e, xmlFile.getName()));
+            }
+        } else {
+            tags = getNewInstance(targetClass);
+        }
+
+        return tags;
+    }
+
+    /**
+     * This method is used to parse {@value TAGS_XML} file (that contains categories and tags)
      * and convert to object view
      *
      * @return {@code TagsStorage} instance which is a container of categories and tags.
      * @throws FileNotFoundException schema file not found
      * @throws JAXBException         validation failed
      */
-    public static TagsStorage getTags() throws FileNotFoundException, JAXBException {
-        TagsStorage tagsStorage;
-        File file = new File(XML_FILE);
-        File schemaFile = FileManipulation.getResourceFile(SCHEMA_LOCATION);
-
-        if (file.exists()) {
-            try {
-
-                JAXBContext jaxbContext = JAXBContext.newInstance(TagsStorage.class);
-
-                Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-                Schema schema = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI)
-                        .newSchema(schemaFile);
-                jaxbUnmarshaller.setSchema(schema);
-                tagsStorage = (TagsStorage) jaxbUnmarshaller.unmarshal(file);
-
-            } catch (JAXBException | SAXException e) {
-                throw new JAXBException(formatExceptionMessage(e, XML_FILE));
-            }
-        } else {
-            tagsStorage = new TagsStorage();
+    public static TagsTree getTags() throws FileNotFoundException, JAXBException {
+        TagsTree tags;
+        try {
+            tags = (TagsTree) getTags(new File(TAGS_XML), TagsTree.class);
+        } catch (IllegalAccessException iae) {
+            // It will never come because TagsStorage class has a public default constructor
+            tags = null;
         }
-
-        return tagsStorage;
+        return tags;
     }
 
     /**
@@ -69,7 +92,7 @@ public abstract class TagsCustodian {
         try {
 
             File file = new File(xmlFile);
-            File schemaFile = FileManipulation.getResourceFile(getSchemaLocation(tags));
+            File schemaFile = FileManipulation.getResourceFile(getSchemaLocation(tags.getClass()));
 
             JAXBContext jaxbContext = JAXBContext.newInstance(tags.getClass());
             Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
@@ -94,12 +117,12 @@ public abstract class TagsCustodian {
      * @param tags instance that contains data
      * @return schema location
      */
-    private static String getSchemaLocation(Object tags) {
+    private static String getSchemaLocation(Class<?> tags) {
         String schemaLocation = null;
-        if (tags instanceof TagsStorage) {
-            schemaLocation = SCHEMA_LOCATION;
-        } else if (tags instanceof Mapper) {
-            schemaLocation = MAPPER_SCHEMA_LOCATION;
+        if (tags == TagsTree.class) {
+            schemaLocation = TAGS_TREE_XSD;
+        } else if (tags == TagsMap.class) {
+            schemaLocation = TAGS_MAP_XSD;
         }
         return schemaLocation;
     }
@@ -113,6 +136,25 @@ public abstract class TagsCustodian {
         String constraintViolation = e.getCause().getMessage().
                 substring(e.getCause().getMessage().indexOf(':') + 2);
         return formatMessage("tags.validation.error.header", xmlFile, constraintViolation);
+    }
+
+    /**
+     * This method is used to create a new {@code targetClass} instance
+     *
+     * @param targetClass the class of the object to be returned
+     * @return new {@code targetClass} instance
+     * @throws IllegalAccessException the target class does not have a public default constructor
+     */
+    private static Object getNewInstance(Class<?> targetClass) throws IllegalAccessException {
+        Object tags;
+        try {
+            tags = targetClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | InvocationTargetException
+                | NoSuchMethodException | IllegalAccessException e) {
+            throw new IllegalAccessException("Target class " + targetClass
+                    + "does not have a public default constructor");
+        }
+        return tags;
     }
 
 }

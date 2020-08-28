@@ -4,9 +4,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
-import kpi.manfredi.tags.mapper.Mapper;
-import kpi.manfredi.tags.mapper.Tag;
+import kpi.manfredi.tags.map.TagsMap;
+import kpi.manfredi.tags.map.Tag;
+import kpi.manfredi.tags.tree.Category;
+import kpi.manfredi.tags.tree.TagsTree;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,13 +21,13 @@ public abstract class TagsAdapter {
      * This method is used to represent {@code TagsStorage} in the form of a {@code CheckTreeView}
      * by creating an appropriate hierarchy of tree items
      *
-     * @param tagsStorage instance that contains categories and tags
+     * @param tagsTree instance that contains categories and tags
      * @return {@code CheckTreeView} root item
      */
-    public static CheckBoxTreeItem<Object> getRootItem(TagsStorage tagsStorage) {
+    public static CheckBoxTreeItem<Object> getRootItem(TagsTree tagsTree) {
         CheckBoxTreeItem<Object> root = new CheckBoxTreeItem<>("Root");
         ObservableList<TreeItem<Object>> childItems = root.getChildren();
-        for (Category category : tagsStorage.getCategory()) {
+        for (Category category : tagsTree.getCategory()) {
             childItems.add(handleCategory(category));
         }
         return root;
@@ -79,15 +82,31 @@ public abstract class TagsAdapter {
      * @param tags list of tags
      * @return {@code Mapper} instance
      */
-    public static Mapper getMapper(List<String> tags) {
-        Mapper mapper = new Mapper();
+    public static TagsMap getMapper(List<String> tags) {
+        TagsMap tagsMap = new TagsMap();
         for (String tagStr : tags) {
             Tag tag = new Tag();
             tag.setName(tagStr);
             tag.getAlias().add(tagStr.substring(1));
-            mapper.getTag().add(tag);
+            tagsMap.getTag().add(tag);
         }
-        return mapper;
+        return tagsMap;
+    }
+
+    /**
+     * This method is used to adapt {@code Mapper} to map of aliases and tags
+     *
+     * @param tagsMap {@code Mapper} instance
+     * @return map of aliases and tags
+     */
+    public static HashMap<String, String> getTagsMap(TagsMap tagsMap) {
+        HashMap<String, String> map = new HashMap<>();
+        for (Tag tag : tagsMap.getTag()) {
+            for (String alias : tag.getAlias()) {
+                map.put(alias, tag.getName());
+            }
+        }
+        return map;
     }
 
 }

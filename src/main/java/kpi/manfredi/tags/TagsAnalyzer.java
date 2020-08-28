@@ -20,7 +20,7 @@ public abstract class TagsAnalyzer {
      * @param recursively include sub-folders when {@code true}
      * @return list of tags
      */
-    public static List<String> getTagsByPath(Path path, boolean recursively) {
+    public static List<String> getTagsFromDirectory(Path path, boolean recursively) {
         List<String> files = null;
         try (Stream<Path> walk = Files.walk(path, recursively ? MAX_VALUE : 1)) {
 
@@ -60,4 +60,5 @@ public abstract class TagsAnalyzer {
         tags = tags.stream().filter(e -> e.matches("#[a-zA-Z_\\d]+")).collect(Collectors.toList());
         return tags;
     }
+
 }
