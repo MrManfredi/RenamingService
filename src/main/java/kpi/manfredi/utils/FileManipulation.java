@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.FileSystemException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -100,19 +102,29 @@ public abstract class FileManipulation {
         }
     }
 
+    /**
+     * This method is used to rename file
+     *
+     * @param file    file to rename
+     * @param newName new name of file
+     * @return renamed file
+     * @throws FileAlreadyExistsException file with name 'newName' already exists
+     * @throws FileNotFoundException      file not found
+     * @throws FileSystemException        file renaming failed
+     */
     public static File renameFile(File file, String newName) throws IOException {
         if (file.exists()) {
             String path = file.getPath();
             String format = getFormatOfFile(path);
-            path = path.replace(file.getName(), "");
-            File newFile = new File(path + newName + format);
+            String dir = path.replace(file.getName(), "");
+            File newFile = new File(dir + newName + format);
             if (newFile.exists()) {
-                throw new IOException("File with name '" + newName + format + "' already exists!");
+                throw new FileAlreadyExistsException("File with name '" + newName + format + "' already exists!");
             }
 
             boolean success = file.renameTo(newFile);
             if (!success) {
-                throw new IOException("File:\n" + file + "\nwas not successfully renamed!");
+                throw new FileSystemException("File: " + file + " was not successfully renamed!");
             } else {
                 logger.debug("File '{}' was successfully renamed to '{}'", file.getName(), newFile.getName());
                 return newFile;
@@ -122,7 +134,38 @@ public abstract class FileManipulation {
         }
     }
 
-    public static List<File> renameFilesByTemplate(List<File> itemsToRename, String prefix, Integer zeroPad, String postfix) {
+    /**
+     * This method is used to rename a file until it is successfully renamed. If the file with the passed name exists,
+     * the method tries to add a number at the end of the name until its name becomes free
+     *
+     * @param file file to rename
+     * @param name new name of file
+     * @return renamed file
+     * @throws FileNotFoundException file not found
+     * @throws FileSystemException   file renaming failed
+     */
+    public static File renameFileUntilSuccessful(File file, String name) throws IOException {
+        if (file.exists()) {
+            File resultFile = null;
+            int i = 0;
+            while (resultFile == null) {
+                try {
+                    resultFile = FileManipulation.renameFile(
+                            file,
+                            i == 0 ? name : name + String.format(" %03d", i));
+                } catch (FileAlreadyExistsException existsException) {
+                    i++;
+                }
+            }
+            return resultFile;
+        } else {
+            throw new FileNotFoundException("File '" + file + "' not found!");
+        }
+    }
+
+    public static List<File> renameFilesByTemplate(
+            List<File> itemsToRename, String prefix, Integer zeroPad, String postfix) {
+
         int i = 1;
         List<File> renamedItems = FXCollections.observableArrayList();
         for (File item : itemsToRename) {
@@ -145,7 +188,9 @@ public abstract class FileManipulation {
                         throw new IOException("File:\n" + item + "\nrenaming was failed!");
                     } else {
                         renamedItems.add(newFile);
-                        logger.debug("File \"{}\" was successfully renamed to \"{}\"", item.getName(), newFile.getName());
+                        logger.debug("File \"{}\" was successfully renamed to \"{}\"",
+                                item.getName(),
+                                newFile.getName());
                     }
                 } catch (IOException e) {
                     logger.error(e.getMessage());

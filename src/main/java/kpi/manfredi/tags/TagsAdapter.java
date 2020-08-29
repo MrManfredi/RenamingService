@@ -4,8 +4,8 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.TreeItem;
-import kpi.manfredi.tags.map.TagsMap;
 import kpi.manfredi.tags.map.Tag;
+import kpi.manfredi.tags.map.TagsMap;
 import kpi.manfredi.tags.tree.Category;
 import kpi.manfredi.tags.tree.TagsTree;
 
@@ -69,18 +69,17 @@ public abstract class TagsAdapter {
     }
 
     /**
-     * This method is used to adapt list of tags to {@code Mapper} structure and
-     * create the basis of the mapping.
+     * This method is used to adapt list of tags to {@code TagsMap} structure and create the basis of the mapping.
      *
      * <br><br>
      * Example:
      * <br><br>
      * Input: {#tag1 #tag2}
      * <br><br>
-     * Output: Mapper { Tag {#tag1 , {tag1}}, Tag {#tag2 , {tag2}}}
+     * Output: TagsMap { Tag {#tag1 , {tag1}}, Tag {#tag2 , {tag2}}}
      *
      * @param tags list of tags
-     * @return {@code Mapper} instance
+     * @return {@code TagsMap} instance
      */
     public static TagsMap getMapper(List<String> tags) {
         TagsMap tagsMap = new TagsMap();
@@ -94,16 +93,16 @@ public abstract class TagsAdapter {
     }
 
     /**
-     * This method is used to adapt {@code Mapper} to map of aliases and tags
+     * This method is used to create map of aliases and tags
      *
-     * @param tagsMap {@code Mapper} instance
+     * @param tagsMap {@code TagsMap} instance
      * @return map of aliases and tags
      */
-    public static HashMap<String, String> getTagsMap(TagsMap tagsMap) {
-        HashMap<String, String> map = new HashMap<>();
+    public static HashMap<String, Tag> getTagsMap(TagsMap tagsMap) {
+        HashMap<String, Tag> map = new HashMap<>();
         for (Tag tag : tagsMap.getTag()) {
             for (String alias : tag.getAlias()) {
-                map.put(alias, tag.getName());
+                map.put(alias, tag);
             }
         }
         return map;
