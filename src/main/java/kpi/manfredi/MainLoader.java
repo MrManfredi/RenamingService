@@ -6,6 +6,7 @@ import kpi.manfredi.monitoring.MonitoringService;
 import kpi.manfredi.tags.TagsAdapter;
 import kpi.manfredi.tags.TagsAnalyzer;
 import kpi.manfredi.tags.TagsCustodian;
+import kpi.manfredi.tags.TagsHandler;
 import kpi.manfredi.tags.map.TagsMap;
 
 import javax.xml.bind.JAXBException;
@@ -15,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 
 public class MainLoader {
@@ -83,6 +83,7 @@ public class MainLoader {
      * @param args input arguments
      */
     private static void runTagsAnalyzer(String[] args) {
+        System.out.println("Tags analyzer is active...\n");
         List<String> tags;
         if (args.length == 2 || !args[1].equals("-r")) {
             tags = TagsAnalyzer.getTagsFromDirectory(Paths.get(args[1]), false);
@@ -150,9 +151,9 @@ public class MainLoader {
             tagsFile = new File(args[3]);
         }
         try {
-            TagsMap mapper = (TagsMap) TagsCustodian.getTags(tagsFile, TagsMap.class);
-            HashMap<String, String> tagsMap = TagsAdapter.getTagsMap(mapper);
-            new MonitoringService(dir, recursive).run(); // todo pass tagsMap into monitoring service
+            TagsMap tagsMap = (TagsMap) TagsCustodian.getTags(tagsFile, TagsMap.class);
+            TagsHandler tagsHandler = new TagsHandler(tagsMap);
+            new MonitoringService(dir, recursive, tagsHandler).run();
         } catch (IOException | IllegalAccessException | JAXBException e) {
             System.err.println(e.getMessage());
         }
