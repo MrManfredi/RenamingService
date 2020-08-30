@@ -2,21 +2,19 @@ package kpi.manfredi.tags;
 
 import kpi.manfredi.tags.map.Tag;
 import kpi.manfredi.tags.map.TagsMap;
-import kpi.manfredi.utils.FileManipulation;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class TagsHandlerTest {
 
@@ -47,35 +45,47 @@ public class TagsHandlerTest {
     public void handleFile() {
         TagsMap tagsMap = getTagsMapForHandleFilename();
 
-        // todo improve - create file just here
-        String name = "/first_s+e-+c(_on)d.cat w_o r -l)d_igno.re-this.text+_third(test)bird.txt";
-        URL resource = TagsHandlerTest.class.getResource(
-                name);
-        if (resource == null) fail("Test file not found");
+        String name = "first_s+e-+c(_on)d.cat w_o r -l)d_igno.re-this.text+_third(test)bird_";
+        String expectedName = "#animal #test #NiceOrdinalTag #yare_yare_daze.txt";
+
         File file = null;
         try {
-            file = new File(resource.toURI());
-        } catch (URISyntaxException e) {
+            file = File.createTempFile(name, ".txt");
+
+            // delete file with expected name so that the method handleFile() can create it
+            String dir = file.getPath().replace(file.getName(), "");
+            Files.deleteIfExists(Paths.get(dir + expectedName));
+        } catch (IOException e) {
             fail(e.getMessage());
         }
-
 
         TagsHandler tagsHandler = new TagsHandler(tagsMap);
         File newFile = null;
         try {
             newFile = tagsHandler.handleFile(file);
+            newFile.deleteOnExit();
         } catch (IOException e) {
             fail(e.getMessage());
         }
+        assertEquals(expectedName, newFile.getName());
 
-        assertEquals("#animal #test #NiceOrdinalTag #yare_yare_daze.txt", newFile.getName());
-
-        // undo renaming
+        // test when file already exists
+        File secondFile = null;
         try {
-            FileManipulation.renameFile(newFile, name.substring(1, name.lastIndexOf('.')));
+            secondFile = File.createTempFile(name, ".txt");
         } catch (IOException e) {
             fail(e.getMessage());
         }
+        File secondNewFile = null;
+        try {
+            secondNewFile = tagsHandler.handleFile(secondFile);
+            secondNewFile.deleteOnExit();
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+
+        String newFileName = secondNewFile.getName().substring(0, secondNewFile.getName().lastIndexOf('.'));
+        assertTrue(newFileName.matches("#animal #test #NiceOrdinalTag #yare_yare_daze[ \\d]*"));
     }
 
     private TagsMap getTagsMapForHandleFilename() {
