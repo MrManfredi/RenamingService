@@ -1,4 +1,4 @@
-package kpi.manfredi.commands;
+package kpi.manfredi.gui.commands;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;

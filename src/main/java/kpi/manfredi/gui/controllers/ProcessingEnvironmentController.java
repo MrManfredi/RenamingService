@@ -13,7 +13,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import kpi.manfredi.commands.MenuCommands;
+import kpi.manfredi.gui.commands.MenuCommands;
 import kpi.manfredi.tags.TagsAdapter;
 import kpi.manfredi.tags.TagsCustodian;
 import kpi.manfredi.tags.tree.TagsTree;
