@@ -5,11 +5,13 @@ import kpi.manfredi.tags.map.TagsMap;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -25,8 +27,13 @@ public class TagsHandlerTest {
         try {
             Method method = TagsHandler.class.getDeclaredMethod("assembleString", List.class);
             method.setAccessible(true);
-            String result = (String) method.invoke(tagsHandler, tags);
-            assertEquals("#fruit #test #OrdinalTag #the_word", result);
+            String result1 = (String) method.invoke(tagsHandler, tags);
+            assertEquals("#fruit #test #OrdinalTag #the_word", result1);
+
+            // when tags list is empty
+            String result2 = (String) method.invoke(tagsHandler, new ArrayList<Tag>());
+            assertEquals("#tagme", result2);
+
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             fail(e.getMessage());
         }
@@ -36,56 +43,55 @@ public class TagsHandlerTest {
     public void handleFilename() {
         TagsMap tagsMap = getTagsMapForHandleFilename();
         TagsHandler tagsHandler = new TagsHandler(tagsMap);
-        String result = tagsHandler.handleFilename(
+
+        String result1 = tagsHandler.handleFilename(
                 "first_dog_s+e-+c(_on)d.cat w_o r -l)d_ign.ore-this.text+_third(test)bird.txt");
-        assertEquals("#animal #test #NiceOrdinalTag #yare_yare_daze", result);
+        assertEquals("#animal #test #NiceOrdinalTag #yare_yare_daze", result1);
+
+        // when name doesn't contain any alias
+        String result2 = tagsHandler.handleFilename(
+                "This text has no any alias.txt");
+        assertEquals("#tagme", result2);
     }
 
     @Test
     public void handleFile() {
         TagsMap tagsMap = getTagsMapForHandleFilename();
-
-        String name = "first_s+e-+c(_on)d.cat w_o r -l)d_igno.re-this.text+_third(test)bird_";
-        String expectedName = "#animal #test #NiceOrdinalTag #yare_yare_daze.txt";
-
-        File file = null;
-        try {
-            file = File.createTempFile(name, ".txt");
-
-            // delete file with expected name so that the method handleFile() can create it
-            String dir = file.getPath().replace(file.getName(), "");
-            Files.deleteIfExists(Paths.get(dir + expectedName));
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
-
         TagsHandler tagsHandler = new TagsHandler(tagsMap);
-        File newFile = null;
-        try {
-            newFile = tagsHandler.handleFile(file);
-            newFile.deleteOnExit();
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
-        assertEquals(expectedName, newFile.getName());
+        String startName = "first_s+e-+c(_on)d.cat w_o r -l)d_igno.re-this.text+_third(test)bird_";
+        String expectedName = "#animal #test #NiceOrdinalTag #yare_yare_daze";
+        String expectedType = ".txt";
 
-        // test when file already exists
-        File secondFile = null;
-        try {
-            secondFile = File.createTempFile(name, ".txt");
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
-        File secondNewFile = null;
-        try {
-            secondNewFile = tagsHandler.handleFile(secondFile);
-            secondNewFile.deleteOnExit();
-        } catch (IOException e) {
-            fail(e.getMessage());
-        }
+        // test when file with expected name doesn't exists
+        File file = getTempFile(startName, expectedType);
+        deleteFileWithExpectedNameIfExists(
+                file.getPath().replace(file.getName(), ""),
+                expectedName,
+                expectedType); // delete file with expected name so that the method handleFile() can create it
+        File handledFile = getHandledFile(tagsHandler, file);
+        assertEquals(expectedName + expectedType, handledFile.getName());
 
-        String newFileName = secondNewFile.getName().substring(0, secondNewFile.getName().lastIndexOf('.'));
-        assertTrue(newFileName.matches("#animal #test #NiceOrdinalTag #yare_yare_daze[ \\d]*"));
+        // test when file with expected name already exists
+        File secondFile = getTempFile(startName, expectedType);
+        File secondHandledFile = getHandledFile(tagsHandler, secondFile);
+        String secondHandledFilename =
+                secondHandledFile.getName().substring(0, secondHandledFile.getName().lastIndexOf('.'));
+        assertTrue(secondHandledFilename.matches(expectedName + "[ \\d]*"));
+
+        // test when file to handle doesn't exists
+        File nonExistentFile = new File("This file should not exist");
+        if (nonExistentFile.exists()) {
+            if (!nonExistentFile.delete()) {
+                fail("Unable to delete a file that should not exist");
+            }
+        }
+        try {
+            tagsHandler.handleFile(nonExistentFile);
+        } catch (FileNotFoundException e) {
+            // as expected
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
     }
 
     private TagsMap getTagsMapForHandleFilename() {
@@ -146,5 +152,50 @@ public class TagsHandlerTest {
         tag4.setPriority((byte) 10);
 
         return Arrays.asList(tag1, tag2, tag3, tag2, tag1, tag4, tag3);
+    }
+
+    /**
+     * This method is used to delete file with expected name if it exists
+     *
+     * @param dir          directory
+     * @param expectedName expected name of file
+     * @param expectedType expected type of file
+     */
+    private void deleteFileWithExpectedNameIfExists(String dir, String expectedName, String expectedType) {
+        try {
+            Files.deleteIfExists(Paths.get(dir + expectedName + expectedType));
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+    }
+
+    /**
+     * This method is used to create temp file
+     *
+     * @param prefix       The prefix string to be used in generating the file's name;
+     *                     must be at least three characters long
+     * @param expectedType The suffix string to be used in generating the file's name;
+     *                     may be null, in which case the suffix ".tmp" will be used
+     * @return An abstract pathname denoting a newly-created empty file
+     */
+    private File getTempFile(String prefix, String expectedType) {
+        File file = null;
+        try {
+            file = File.createTempFile(prefix, expectedType);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+        return file;
+    }
+
+    private File getHandledFile(TagsHandler tagsHandler, File file) {
+        File newFile = null;
+        try {
+            newFile = tagsHandler.handleFile(file);
+            newFile.deleteOnExit();
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
+        return newFile;
     }
 }

@@ -72,9 +72,13 @@ public class TagsHandler {
      * This method is used to retrieve a string from a list of tags in the correct order
      *
      * @param tags list of tags
-     * @return string
+     * @return string from tags; "{@code #tagme}" string when list is empty
      */
     private String assembleString(List<Tag> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return "#tagme";
+        }
+
         HashSet<Tag> uniqueTags = new HashSet<>(tags);
         List<Tag> sortedTags = uniqueTags.stream()
                 .sorted(Comparator.comparingInt(Tag::getPriority))
