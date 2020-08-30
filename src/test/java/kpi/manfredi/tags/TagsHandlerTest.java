@@ -45,7 +45,7 @@ public class TagsHandlerTest {
         TagsHandler tagsHandler = new TagsHandler(tagsMap);
 
         String result1 = tagsHandler.handleFilename(
-                "first_dog_s+e-+c(_on)d.cat w_o r -l)d_ign.ore-this.text+_third(test)bird.txt");
+                "first_dog_s+e-+c(_on)d.cat w_o r -l)d_ign.ore-this.text+_third(bird)test");
         assertEquals("#animal #test #NiceOrdinalTag #yare_yare_daze", result1);
 
         // when name doesn't contain any alias

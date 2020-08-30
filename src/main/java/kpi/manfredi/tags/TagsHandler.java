@@ -52,15 +52,19 @@ public class TagsHandler {
 
         for (int i = 0; i < elements.length; i++) {
             if (!elements[i].isEmpty()) {
-                StringBuilder temp = new StringBuilder(elements[i]);
-                for (int j = i + 1; j < elements.length; j++) {
-                    if (tagsMap.containsKey(temp.toString())) {
-                        resultList.add(tagsMap.get(temp.toString()));
-                        i = j - 1;
-                        break;
-                    } else {
-                        temp.append('_').append(elements[j]);
-                    }
+                if (tagsMap.containsKey(elements[i])) {
+                    resultList.add(tagsMap.get(elements[i]));
+                } else if (i + 1 < elements.length) {
+                    StringBuilder temp = new StringBuilder(elements[i]);
+                    int j = i + 1;
+                    do {
+                        temp.append('_').append(elements[j++]);
+                        if (tagsMap.containsKey(temp.toString())) {
+                            resultList.add(tagsMap.get(temp.toString()));
+                            i = j - 1;
+                            break;
+                        }
+                    } while (j < elements.length);
                 }
             }
         }
