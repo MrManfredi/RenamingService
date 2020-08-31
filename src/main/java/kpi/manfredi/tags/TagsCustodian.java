@@ -22,8 +22,8 @@ import static kpi.manfredi.utils.MessageUtil.formatMessage;
  * This class is used to provide methods to save tags in XML file and read it
  */
 public abstract class TagsCustodian {
-    private static final String TAGS_TREE_XSD = "/tagsTree.xsd";
-    private static final String TAGS_MAP_XSD = "/tagsMap.xsd";
+    private static final String TAGS_TREE_XSD = "/tags/tagsTree.xsd";
+    private static final String TAGS_MAP_XSD = "/tags/tagsMap.xsd";
     private static final String TAGS_XML = "tags.xml";
 
     /**
