@@ -3,12 +3,13 @@
            targetNamespace="http://map.tags.manfredi.kpi"
            xmlns:tns="http://map.tags.manfredi.kpi"
            elementFormDefault="qualified">
+
     <xs:complexType name="Tag">
         <xs:sequence>
             <xs:element name="alias" minOccurs="1" maxOccurs="unbounded">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
-                        <xs:pattern value="[a-zA-Z_\d()]+"/>
+                        <xs:pattern value="[a-zA-Z_\d]+"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:element>
@@ -26,9 +27,18 @@
     <xs:element name="tagsMap">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="tag" type="tns:Tag" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element name="tag" type="tns:Tag" minOccurs="0" maxOccurs="unbounded">
+                    <xs:unique name="AliasUniqueKey">
+                        <xs:selector xpath="tns:alias"/>
+                        <xs:field xpath="."/>
+                    </xs:unique>
+                </xs:element>
             </xs:sequence>
         </xs:complexType>
+        <xs:unique name="TagUniqueKey">
+            <xs:selector xpath="tns:tag"/>
+            <xs:field xpath="@name"/>
+        </xs:unique>
     </xs:element>
 
 </xs:schema>
