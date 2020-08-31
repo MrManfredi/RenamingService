@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tns:tagsTree xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://tree.tags.manfredi.kpi"
+              xsi:schemaLocation="http://tree.tags.manfredi.kpi tagsTree.xsd"
+              xmlns:tns="http://tree.tags.manfredi.kpi">
+
+    <tns:category name="Animals">
+        <tns:category name="Flying">
+            <tns:tag>sparrow</tns:tag>
+            <tns:tag>crow</tns:tag>
+        </tns:category>
+        <tns:category name="floating">
+            <tns:tag>pike</tns:tag>
+            <tns:tag>dolphin</tns:tag>
+            <tns:tag>squid</tns:tag>
+        </tns:category>
+    </tns:category>
+
+    <tns:category name="Subject">
+        <tns:category name="Clothes">
+            <tns:tag>sunglasses</tns:tag>
+            <tns:tag>skirt</tns:tag>
+            <tns:tag>swimsuit</tns:tag>
+        </tns:category>
+        <tns:category name="Food">
+            <tns:tag>watermelon</tns:tag>
+            <tns:tag>ice_cream</tns:tag>
+        </tns:category>
+    </tns:category>
+
+</tns:tagsTree>

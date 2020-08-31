@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<tns:tagsMap xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://map.tags.manfredi.kpi"
+         xsi:schemaLocation="http://map.tags.manfredi.kpi tagsMap.xsd"
+         xmlns:tns="http://map.tags.manfredi.kpi">
+
+    <tns:tag name="#animal">
+        <tns:alias>cat</tns:alias>
+        <tns:alias>dog</tns:alias>
+        <tns:alias>bird</tns:alias>
+    </tns:tag>
+
+    <tns:tag name="#weapon">
+        <tns:alias>sword</tns:alias>
+        <tns:alias>gun</tns:alias>
+    </tns:tag>
+
+    <tns:tag name="#food">
+        <tns:alias>orange</tns:alias>
+        <tns:alias>cookie</tns:alias>
+        <tns:alias>meat</tns:alias>
+    </tns:tag>
+
+</tns:tagsMap>

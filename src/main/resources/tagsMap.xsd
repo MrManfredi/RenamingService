@@ -27,17 +27,16 @@
     <xs:element name="tagsMap">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="tag" type="tns:Tag" minOccurs="0" maxOccurs="unbounded">
-                    <xs:unique name="AliasUniqueKey">
-                        <xs:selector xpath="tns:alias"/>
-                        <xs:field xpath="."/>
-                    </xs:unique>
-                </xs:element>
+                <xs:element name="tag" type="tns:Tag" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
         <xs:unique name="TagUniqueKey">
             <xs:selector xpath="tns:tag"/>
             <xs:field xpath="@name"/>
+        </xs:unique>
+        <xs:unique name="AliasUniqueKey">
+            <xs:selector xpath="tns:tag/tns:alias"/>
+            <xs:field xpath="."/>
         </xs:unique>
     </xs:element>
 
