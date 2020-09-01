@@ -11,6 +11,8 @@ import kpi.manfredi.tags.tree.TagsTree;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This class is used to provide methods to represent tags as {@code CheckTreeView}
@@ -69,7 +71,7 @@ public abstract class TagsAdapter {
     }
 
     /**
-     * This method is used to adapt list of tags to {@code TagsMap} structure and create the basis of the mapping.
+     * This method is used to convert list of tags to {@code TagsMap} structure and create the basis of the mapping.
      *
      * <br><br>
      * Example:
@@ -78,16 +80,21 @@ public abstract class TagsAdapter {
      * <br><br>
      * Output: TagsMap { Tag {#tag1 , {tag1}}, Tag {#tag2 , {tag2}}}
      *
-     * @param tags list of tags
+     * @param tags set of tags
      * @return {@code TagsMap} instance
      */
-    public static TagsMap getMapper(List<String> tags) {
+    public static TagsMap convertToTagsMap(Set<String> tags) {
+        List<String> orderedList = tags.stream().sorted().collect(Collectors.toList());
         TagsMap tagsMap = new TagsMap();
-        for (String tagStr : tags) {
+        for (String tagStr : orderedList) {
             Tag tag = new Tag();
             tag.setName(tagStr);
             tag.getAlias().add(tagStr.substring(1));
-            tagsMap.getTag().add(tag);
+            if (tagStr.matches("#by_[a-zA-Z\\d_]+")) {
+                tag.getAlias().add(tagStr.replace("#by_", ""));
+                tag.setPriority((byte) 100);
+            }
+            tagsMap.getTag().add(tag);  // todo add special priority for upper case tags
         }
         return tagsMap;
     }
@@ -98,7 +105,7 @@ public abstract class TagsAdapter {
      * @param tagsMap {@code TagsMap} instance
      * @return map of aliases and tags
      */
-    public static HashMap<String, Tag> getTagsMap(TagsMap tagsMap) {
+    public static HashMap<String, Tag> getReversedTagsMap(TagsMap tagsMap) {
         HashMap<String, Tag> map = new HashMap<>();
         for (Tag tag : tagsMap.getTag()) {
             for (String alias : tag.getAlias()) {

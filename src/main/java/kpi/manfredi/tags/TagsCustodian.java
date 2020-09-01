@@ -84,14 +84,14 @@ public abstract class TagsCustodian {
     /**
      * This method is used to save tags to XML file
      *
-     * @param tags    instance that contains data
-     * @param xmlFile name of file to save into
+     * @param tags instance of class with XML annotation that contains data
+     * @param file file to save into
      * @throws FileNotFoundException schema file not found
+     * @throws JAXBException         validation failed
      */
-    public static void saveTags(Object tags, String xmlFile) throws FileNotFoundException, JAXBException {
+    public static void saveTags(Object tags, File file) throws FileNotFoundException, JAXBException {
         try {
 
-            File file = new File(xmlFile);
             File schemaFile = FileManipulation.getResourceFile(getSchemaLocation(tags.getClass()));
 
             JAXBContext jaxbContext = JAXBContext.newInstance(tags.getClass());
@@ -107,7 +107,7 @@ public abstract class TagsCustodian {
             jaxbMarshaller.marshal(tags, file);
 
         } catch (JAXBException | SAXException e) {
-            throw new JAXBException(formatExceptionMessage(e, xmlFile));
+            throw new JAXBException(formatExceptionMessage(e, file.getName()));
         }
     }
 

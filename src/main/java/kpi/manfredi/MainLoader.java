@@ -3,20 +3,18 @@ package kpi.manfredi;
 import javafx.application.Application;
 import kpi.manfredi.gui.JavaFxMain;
 import kpi.manfredi.monitoring.MonitoringService;
-import kpi.manfredi.tags.TagsAdapter;
-import kpi.manfredi.tags.TagsAnalyzer;
+import kpi.manfredi.scanning.TagsScanner;
 import kpi.manfredi.tags.TagsCustodian;
 import kpi.manfredi.tags.TagsHandler;
 import kpi.manfredi.tags.map.TagsMap;
+import kpi.manfredi.utils.FileManipulation;
+import kpi.manfredi.utils.WrongArgumentsException;
 
 import javax.xml.bind.JAXBException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 public class MainLoader {
 
@@ -25,8 +23,8 @@ public class MainLoader {
             Application.launch(JavaFxMain.class, args);
         } else if (isHelp(args)) {
             showHelp();
-        } else if (isTagsAnalyzer(args)) {
-            runTagsAnalyzer(args);
+        } else if (args[0].equals("-s")) {
+            runTagsScanner(args);
         } else if (isMonitoringService(args)) {
             runMonitoringService(args);
         } else {
@@ -106,6 +104,26 @@ public class MainLoader {
                 }
                 System.out.println("Tags was written into " + args[3]);
             }
+        }
+    }
+
+    /**
+     * This method is used to invoke tags analyzer
+     *
+     * @param args input arguments
+     */
+    private static void runTagsScanner(String[] args) {
+        try {
+            System.out.println("\nTags scanner is active...\n");
+            File file = TagsScanner.scan(args);
+            if (file.exists()) {
+                System.out.println("Tags was written into " + file.getName());
+            } else {
+                System.out.println("Tags not found.");
+            }
+        } catch (FileNotFoundException | WrongArgumentsException | JAXBException e) {
+            System.err.println(e.getMessage());
+            System.exit(-1);
         }
     }
 

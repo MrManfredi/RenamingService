@@ -12,12 +12,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class TagsHandler {
-    TagsMap tags;
-    HashMap<String, Tag> tagsMap;
+    private final TagsMap tagsMap;
+    private final HashMap<String, Tag> reversedTagsMap;
 
-    public TagsHandler(TagsMap tags) {
-        this.tags = tags;
-        tagsMap = TagsAdapter.getTagsMap(tags);
+    public TagsHandler(TagsMap tagsMap) {
+        this.tagsMap = tagsMap;
+        reversedTagsMap = TagsAdapter.getReversedTagsMap(tagsMap);
     }
 
     /**
@@ -50,17 +50,18 @@ public class TagsHandler {
 
         String[] elements = filename.split("[ _+\\-().,]+");
 
+        // todo update algorithm of tag matching
         for (int i = 0; i < elements.length; i++) {
             if (!elements[i].isEmpty()) {
-                if (tagsMap.containsKey(elements[i])) {
-                    resultList.add(tagsMap.get(elements[i]));
+                if (reversedTagsMap.containsKey(elements[i])) {
+                    resultList.add(reversedTagsMap.get(elements[i]));
                 } else if (i + 1 < elements.length) {
                     StringBuilder temp = new StringBuilder(elements[i]);
                     int j = i + 1;
                     do {
                         temp.append('_').append(elements[j++]);
-                        if (tagsMap.containsKey(temp.toString())) {
-                            resultList.add(tagsMap.get(temp.toString()));
+                        if (reversedTagsMap.containsKey(temp.toString())) {
+                            resultList.add(reversedTagsMap.get(temp.toString()));
                             i = j - 1;
                             break;
                         }
