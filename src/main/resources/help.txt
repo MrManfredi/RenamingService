@@ -1,0 +1,21 @@
+
++=============================================================================+
+|            This application have some tools for handle filenames            |
++=============================================================================+
+| Usage: java -jar <application-name> <parameters-list>                       |
++-----------------------------------------------------------------------------+
+| Available parameters:                                                       |
+| -h     - help info                                                          |
+| -m     - monitoring service                                                 |
+| -r     - recursively (with sub-directories)                                 |
+| -s     - scanning service                                                   |
+| <dir>  - path to directory                                                  |
+| <file> - path to file                                                       |
++-----------------------------------------------------------------------------+
+| Available parameters combinations:                                          |
+| without param.       - gui application for renaming                         |
+| -h                   - show this help info                                  |
+| -s [-r] <dir> <file> - scan directory, collect tags and save into file      |
+| -m [-r] <dir> <file> - start monitor directory. Created files in monitored  |
+|                        directory will be renamed using tags map from file   |
++-----------------------------------------------------------------------------+

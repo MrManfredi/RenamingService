@@ -47,63 +47,22 @@ public class MainLoader {
      * This method is used to show help information about application API
      */
     private static void showHelp() {
-        System.out.println("Usage: java -jar <application-name> [-h | -m [-r] <dir> <file-with-tags> | " +
-                "-a [-r] <dir> [<file-save-into>]]");
-        System.out.println("without param.  - gui application");
-        System.out.println("-a              - analyze directory and collect tags");
-        System.out.println("-h              - this help information");
-        System.out.println("-m              - directory monitoring service");
-        System.out.println("-r              - recursively (sub-folders)");
-    }
-
-    /**
-     * This method is used to check if arguments meet the condition of {@code TagsAnalyzer}.
-     * <br><br>
-     * Valid input parameters: -a [-r] &lt;dir&gt; [&lt;file-save-into&gt;]
-     *
-     * @param args list of arguments
-     * @return {@code true} when the parameters meet the condition of {@code TagsAnalyzer}. Otherwise {@code false}
-     */
-    private static boolean isTagsAnalyzer(String[] args) {
-        boolean result;
-        if (args.length < 2 || !args[0].equals("-a")) {
-            result = false;
-        } else if (args.length == 2 && Files.exists(Paths.get(args[1]))) {
-            result = true;
-        } else result = args.length < 5 && args[1].equals("-r") && Files.exists(Paths.get(args[2]));
-
-        return result;
-    }
-
-    /**
-     * This method is used to invoke tags analyzer
-     *
-     * @param args input arguments
-     */
-    private static void runTagsAnalyzer(String[] args) {
-        System.out.println("Tags analyzer is active...\n");
-        List<String> tags;
-        if (args.length == 2 || !args[1].equals("-r")) {
-            tags = TagsAnalyzer.getTagsFromDirectory(Paths.get(args[1]), false);
-        } else {
-            tags = TagsAnalyzer.getTagsFromDirectory(Paths.get(args[2]), true);
+        File file;
+        try {
+            file = FileManipulation.getResourceFile("/help.txt");
+        } catch (FileNotFoundException e) {
+            System.err.println("Help file is not found!");
+            return;
         }
 
-        if (tags != null) {
-            if (args.length == 2 || (args.length == 3 && args[1].equals("-r"))) {
-                System.out.println("------Result set------");
-                for (String item : tags) {
-                    System.out.println(item);
-                }
-            } else {
-                try {
-                    TagsCustodian.saveTags(TagsAdapter.getMapper(tags), args[3]);
-                } catch (FileNotFoundException | JAXBException e) {
-                    System.err.println(e.getMessage());
-                    System.exit(-1);
-                }
-                System.out.println("Tags was written into " + args[3]);
+        try (FileReader fr = new FileReader(file)) {
+            BufferedReader br = new BufferedReader(fr);
+            String line;
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
             }
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
         }
     }
 
