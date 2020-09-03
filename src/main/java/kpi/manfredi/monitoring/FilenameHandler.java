@@ -13,11 +13,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class FilenameHandler {
-    private final TagsMap tagsMap;
     private final HashMap<String, Tag> reversedTagsMap;
 
     public FilenameHandler(TagsMap tagsMap) {
-        this.tagsMap = tagsMap;
         reversedTagsMap = TagsAdapter.getReversedTagsMap(tagsMap);
     }
 
@@ -48,30 +46,43 @@ public class FilenameHandler {
     public String handleFilename(String filename) {
 
         List<Tag> resultList = new ArrayList<>();
+        List<String> elements = new ArrayList<>(List.of(filename.split("[ _+\\-().,#]+")));
 
-        String[] elements = filename.split("[ _+\\-().,]+");
-
-        // todo update algorithm of tag matching
-        for (int i = 0; i < elements.length; i++) {
-            if (!elements[i].isEmpty()) {
-                if (reversedTagsMap.containsKey(elements[i])) {
-                    resultList.add(reversedTagsMap.get(elements[i]));
-                } else if (i + 1 < elements.length) {
-                    StringBuilder temp = new StringBuilder(elements[i]);
-                    int j = i + 1;
-                    do {
-                        temp.append('_').append(elements[j++]);
-                        if (reversedTagsMap.containsKey(temp.toString())) {
-                            resultList.add(reversedTagsMap.get(temp.toString()));
-                            i = j - 1;
-                            break;
-                        }
-                    } while (j < elements.length);
-                }
+        while (!elements.isEmpty()) {
+            Tag resultTag = extractLongestTag(elements);
+            if (resultTag != null) {
+                resultList.add(resultTag);
+            } else {
+                elements.remove(0);
             }
         }
 
         return assembleString(resultList);
+    }
+
+    /**
+     * This method is used to find longer tag which consist from elements with indices ranging from {@code 0} to
+     * {@code indexOfLastElement}, remove those elements and return that tag.
+     *
+     * @param elements list of elements
+     * @return longest tag
+     */
+    private Tag extractLongestTag(List<String> elements) {
+        Integer indexOfLastElement = null;
+        int j = 1;
+        Tag resultTag = null;
+        while (j <= elements.size()) {
+            Tag tempTag = reversedTagsMap.get(String.join("_", elements.subList(0, j)));
+            if (tempTag != null) {
+                resultTag = tempTag;
+                indexOfLastElement = j;
+            }
+            j++;
+        }
+        if (indexOfLastElement != null) {
+            elements.removeAll(elements.subList(0, indexOfLastElement));
+        }
+        return resultTag;
     }
 
     /**

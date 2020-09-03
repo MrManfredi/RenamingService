@@ -41,17 +41,26 @@ public class FilenameHandlerTest {
 
     @Test
     public void handleFilename() {
-        TagsMap tagsMap = getTagsMapForHandleFilename();
+        TagsMap tagsMap = getTagsMapForHandleFilename(); // #animal #animal_ears #test #NiceOrdinalTag #yare_yare_daze
         FilenameHandler filenameHandler = new FilenameHandler(tagsMap);
 
+        // when the text consists of ordinary words
         String result1 = filenameHandler.handleFilename(
                 "first_dog_s+e-+c(_on)d.cat w_o r -l)d_ign.ore-this.text+_third(bird)test");
         assertEquals("#animal #test #NiceOrdinalTag #yare_yare_daze", result1);
 
         // when name doesn't contain any alias
-        String result2 = filenameHandler.handleFilename(
-                "This text has no any alias.txt");
+        String result2 = filenameHandler.handleFilename("This text has no any alias");
         assertEquals("#tagme", result2);
+
+        // when the text consists of both tags and ordinary words
+        String result3 = filenameHandler.handleFilename("first #test word #nonexistent_cat");
+        assertEquals("#animal #test #NiceOrdinalTag", result3);
+
+        // when the text consists of complex aliases
+        String result4 = filenameHandler.handleFilename("test cat_ears");
+        assertEquals("#animal_ears #test", result4);
+
     }
 
     @Test
@@ -121,8 +130,12 @@ public class FilenameHandlerTest {
         tag4.getAlias().addAll(Arrays.asList("dog", "cat", "bird"));
         tag4.setPriority((byte) 17);
 
+        Tag tag5 = new Tag();
+        tag5.setName("#animal_ears");
+        tag5.getAlias().addAll(Arrays.asList("dog_ears", "cat_ears"));
+        tag5.setPriority((byte) 25);
 
-        return Arrays.asList(tag1, tag2, tag3, tag4);
+        return Arrays.asList(tag1, tag2, tag3, tag4, tag5);
     }
 
     private TagsMap getTagsMapForAssembleString() {
