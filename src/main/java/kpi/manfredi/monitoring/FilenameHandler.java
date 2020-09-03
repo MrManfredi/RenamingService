@@ -1,5 +1,6 @@
-package kpi.manfredi.tags;
+package kpi.manfredi.monitoring;
 
+import kpi.manfredi.tags.TagsAdapter;
 import kpi.manfredi.tags.map.Tag;
 import kpi.manfredi.tags.map.TagsMap;
 import kpi.manfredi.utils.FileManipulation;
@@ -11,11 +12,11 @@ import java.nio.file.FileSystemException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TagsHandler {
+public class FilenameHandler {
     private final TagsMap tagsMap;
     private final HashMap<String, Tag> reversedTagsMap;
 
-    public TagsHandler(TagsMap tagsMap) {
+    public FilenameHandler(TagsMap tagsMap) {
         this.tagsMap = tagsMap;
         reversedTagsMap = TagsAdapter.getReversedTagsMap(tagsMap);
     }

@@ -1,7 +1,5 @@
 package kpi.manfredi.monitoring;
 
-import kpi.manfredi.tags.TagsHandler;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -23,15 +21,10 @@ public class MonitoringService implements Runnable {
     private final Map<WatchKey, Path> keys;
     private final boolean recursive;
     private final boolean trace;
-    private final TagsHandler tagsHandler;
+    private final FilenameHandler filenameHandler;
     private final ArrayList<Path> changedWithinService;
     private final ArrayList<String> ignoreTypes;
     private final DateTimeFormatter timeFormatter;
-
-    @SuppressWarnings("unchecked")
-    static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>) event;
-    }
 
     /**
      * Register the given directory with the WatchService
@@ -70,19 +63,20 @@ public class MonitoringService implements Runnable {
     /**
      * Creates a WatchService and registers the given directory
      */
-    public MonitoringService(Path dir, boolean recursive, TagsHandler tagsHandler)
+    public MonitoringService(Path dir, boolean recursive, FilenameHandler filenameHandler)
             throws IOException {
 
         this.recursive = recursive;
         this.keys = new HashMap<>();
-        this.tagsHandler = tagsHandler;
+        this.filenameHandler = filenameHandler;
         this.changedWithinService = new ArrayList<>();
         this.watcher = FileSystems.getDefault().newWatchService();
         this.timeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
         this.ignoreTypes = new ArrayList<>();
-        ignoreTypes.add(".crdownload");
+        ignoreTypes.add(".crdownload"); // todo read ignore types from file
 
         if (recursive) {
+            // todo pass notifications about events (not handle within this class)
             System.out.format("Scanning %s ...\n", dir);
             registerAll(dir);
             System.out.println("Done.");
@@ -100,14 +94,14 @@ public class MonitoringService implements Runnable {
     @Override
     public void run() {
         System.out.println("Monitoring service is active...\n");
-//        for (int i = 1; i < 2; i++) {
+
         for (; ; ) {
 
             // wait for key to be signalled
             WatchKey key;
             try {
                 key = watcher.take();
-                TimeUnit.SECONDS.sleep(1);
+                TimeUnit.SECONDS.sleep(5);
             } catch (InterruptedException x) {
                 return;
             }
@@ -120,6 +114,8 @@ public class MonitoringService implements Runnable {
 
             for (WatchEvent<?> event : key.pollEvents()) {
                 WatchEvent.Kind<?> kind = event.kind();
+
+                // todo extract checks into method
 
                 // No matter what events the key has registered for, it is possible to receive an OVERFLOW even
                 if (kind == OVERFLOW) {
@@ -142,11 +138,13 @@ public class MonitoringService implements Runnable {
                 }
 
                 if (filename.replace(type, "").matches("^#[a-zA-Z_\\d]+( #[a-zA-Z_\\d]+)+$")) {
+                    // todo add numbers in the end
+                    // todo merge with existing tags map
                     continue; // file already fine named
                 }
 
                 try {
-                    File handledFile = tagsHandler.handleFile(child.toFile());
+                    File handledFile = filenameHandler.handleFile(child.toFile());
                     changedWithinService.add(handledFile.toPath());
                     System.out.format(timeFormatter.format(LocalDateTime.now()) +
                             "\nNew file: %s\nRenamed to: %s\n\n", child, handledFile.getPath());

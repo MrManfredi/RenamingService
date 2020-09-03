@@ -1,4 +1,4 @@
-package kpi.manfredi.tags;
+package kpi.manfredi.monitoring;
 
 import kpi.manfredi.tags.map.Tag;
 import kpi.manfredi.tags.map.TagsMap;
@@ -18,20 +18,20 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 
-public class TagsHandlerTest {
+public class FilenameHandlerTest {
 
     @Test
     public void assembleString() {
         List<Tag> tags = getTestTagsForAssembleString();
-        TagsHandler tagsHandler = new TagsHandler(getTagsMapForAssembleString());
+        FilenameHandler filenameHandler = new FilenameHandler(getTagsMapForAssembleString());
         try {
-            Method method = TagsHandler.class.getDeclaredMethod("assembleString", List.class);
+            Method method = FilenameHandler.class.getDeclaredMethod("assembleString", List.class);
             method.setAccessible(true);
-            String result1 = (String) method.invoke(tagsHandler, tags);
+            String result1 = (String) method.invoke(filenameHandler, tags);
             assertEquals("#fruit #test #OrdinalTag #the_word", result1);
 
             // when tags list is empty
-            String result2 = (String) method.invoke(tagsHandler, new ArrayList<Tag>());
+            String result2 = (String) method.invoke(filenameHandler, new ArrayList<Tag>());
             assertEquals("#tagme", result2);
 
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -42,14 +42,14 @@ public class TagsHandlerTest {
     @Test
     public void handleFilename() {
         TagsMap tagsMap = getTagsMapForHandleFilename();
-        TagsHandler tagsHandler = new TagsHandler(tagsMap);
+        FilenameHandler filenameHandler = new FilenameHandler(tagsMap);
 
-        String result1 = tagsHandler.handleFilename(
+        String result1 = filenameHandler.handleFilename(
                 "first_dog_s+e-+c(_on)d.cat w_o r -l)d_ign.ore-this.text+_third(bird)test");
         assertEquals("#animal #test #NiceOrdinalTag #yare_yare_daze", result1);
 
         // when name doesn't contain any alias
-        String result2 = tagsHandler.handleFilename(
+        String result2 = filenameHandler.handleFilename(
                 "This text has no any alias.txt");
         assertEquals("#tagme", result2);
     }
@@ -57,7 +57,7 @@ public class TagsHandlerTest {
     @Test
     public void handleFile() {
         TagsMap tagsMap = getTagsMapForHandleFilename();
-        TagsHandler tagsHandler = new TagsHandler(tagsMap);
+        FilenameHandler filenameHandler = new FilenameHandler(tagsMap);
         String startName = "first_s+e-+c(_on)d.cat w_o r -l)d_igno.re-this.text+_third(test)bird_";
         String expectedName = "#animal #test #NiceOrdinalTag #yare_yare_daze";
         String expectedType = ".txt";
@@ -68,12 +68,12 @@ public class TagsHandlerTest {
                 file.getPath().replace(file.getName(), ""),
                 expectedName,
                 expectedType); // delete file with expected name so that the method handleFile() can create it
-        File handledFile = getHandledFile(tagsHandler, file);
+        File handledFile = getHandledFile(filenameHandler, file);
         assertEquals(expectedName + expectedType, handledFile.getName());
 
         // test when file with expected name already exists
         File secondFile = getTempFile(startName, expectedType);
-        File secondHandledFile = getHandledFile(tagsHandler, secondFile);
+        File secondHandledFile = getHandledFile(filenameHandler, secondFile);
         String secondHandledFilename =
                 secondHandledFile.getName().substring(0, secondHandledFile.getName().lastIndexOf('.'));
         assertTrue(secondHandledFilename.matches(expectedName + "[ \\d]*"));
@@ -86,7 +86,7 @@ public class TagsHandlerTest {
             }
         }
         try {
-            tagsHandler.handleFile(nonExistentFile);
+            filenameHandler.handleFile(nonExistentFile);
         } catch (FileNotFoundException e) {
             // as expected
         } catch (IOException e) {
@@ -188,10 +188,10 @@ public class TagsHandlerTest {
         return file;
     }
 
-    private File getHandledFile(TagsHandler tagsHandler, File file) {
+    private File getHandledFile(FilenameHandler filenameHandler, File file) {
         File newFile = null;
         try {
-            newFile = tagsHandler.handleFile(file);
+            newFile = filenameHandler.handleFile(file);
             newFile.deleteOnExit();
         } catch (IOException e) {
             fail(e.getMessage());

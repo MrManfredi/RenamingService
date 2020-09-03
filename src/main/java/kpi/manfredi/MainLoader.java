@@ -5,7 +5,7 @@ import kpi.manfredi.gui.JavaFxMain;
 import kpi.manfredi.monitoring.MonitoringService;
 import kpi.manfredi.scanning.TagsScanner;
 import kpi.manfredi.tags.TagsCustodian;
-import kpi.manfredi.tags.TagsHandler;
+import kpi.manfredi.monitoring.FilenameHandler;
 import kpi.manfredi.tags.map.TagsMap;
 import kpi.manfredi.utils.FileManipulation;
 import kpi.manfredi.utils.WrongArgumentsException;
@@ -129,8 +129,8 @@ public class MainLoader {
         }
         try {
             TagsMap tagsMap = (TagsMap) TagsCustodian.getTags(tagsFile, TagsMap.class);
-            TagsHandler tagsHandler = new TagsHandler(tagsMap);
-            new MonitoringService(dir, recursive, tagsHandler).run();
+            FilenameHandler filenameHandler = new FilenameHandler(tagsMap);
+            new MonitoringService(dir, recursive, filenameHandler).run();
         } catch (IOException | IllegalAccessException | JAXBException e) {
             System.err.println(e.getMessage());
         }
