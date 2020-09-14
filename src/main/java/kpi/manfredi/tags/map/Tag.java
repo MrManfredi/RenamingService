@@ -10,6 +10,7 @@ package kpi.manfredi.tags.map;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -144,4 +145,18 @@ public class Tag {
         this.priority = value;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Tag tag = (Tag) o;
+        return getAlias().equals(tag.getAlias()) &&
+                getName().equals(tag.getName()) &&
+                getPriority() == tag.getPriority();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getAlias(), getName(), getPriority());
+    }
 }

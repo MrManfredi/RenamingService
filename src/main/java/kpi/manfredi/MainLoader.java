@@ -2,10 +2,10 @@ package kpi.manfredi;
 
 import javafx.application.Application;
 import kpi.manfredi.gui.JavaFxMain;
+import kpi.manfredi.monitoring.FilenameHandler;
 import kpi.manfredi.monitoring.MonitoringService;
 import kpi.manfredi.scanning.TagsScanner;
 import kpi.manfredi.tags.TagsCustodian;
-import kpi.manfredi.monitoring.FilenameHandler;
 import kpi.manfredi.tags.map.TagsMap;
 import kpi.manfredi.utils.FileManipulation;
 import kpi.manfredi.utils.WrongArgumentsException;
@@ -80,7 +80,7 @@ public class MainLoader {
             } else {
                 System.out.println("Tags not found.");
             }
-        } catch (FileNotFoundException | WrongArgumentsException | JAXBException e) {
+        } catch (IOException | WrongArgumentsException | JAXBException e) {
             System.err.println(e.getMessage());
             System.exit(-1);
         }

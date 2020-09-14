@@ -9,9 +9,9 @@ import kpi.manfredi.tags.map.TagsMap;
 import kpi.manfredi.tags.tree.Category;
 import kpi.manfredi.tags.tree.TagsTree;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -71,7 +71,7 @@ public abstract class TagsAdapter {
     }
 
     /**
-     * This method is used to convert list of tags to {@code TagsMap} structure and create the basis of the mapping.
+     * This method is used to convert collection of tags to {@code TagsMap} structure and create the basis of the mapping.
      *
      * <br><br>
      * Example:
@@ -80,10 +80,10 @@ public abstract class TagsAdapter {
      * <br><br>
      * Output: TagsMap { Tag {#tag1 , {tag1}}, Tag {#tag2 , {tag2}}}
      *
-     * @param tags set of tags
+     * @param tags collection of tags
      * @return {@code TagsMap} instance
      */
-    public static TagsMap convertToTagsMap(Set<String> tags) {
+    public static TagsMap convertToTagsMap(Collection<String> tags) {
         List<String> orderedList = tags.stream().sorted().collect(Collectors.toList());
         TagsMap tagsMap = new TagsMap();
         for (String tagStr : orderedList) {

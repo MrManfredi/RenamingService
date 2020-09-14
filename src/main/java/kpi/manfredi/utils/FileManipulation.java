@@ -259,4 +259,17 @@ public abstract class FileManipulation {
         return file;
     }
 
+    /**
+     * This method is used to exclude extension from filename.
+     *
+     * @param filename filename
+     * @return filename without extension
+     */
+    public static String excludeExtension(String filename) {
+        if (filename != null && filename.contains(".")) {
+            return filename.substring(0, filename.lastIndexOf('.'));
+        } else {
+            return filename;
+        }
+    }
 }
